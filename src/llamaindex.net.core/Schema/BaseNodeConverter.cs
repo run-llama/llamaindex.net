@@ -33,30 +33,30 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
                 JsonElement? nodeRelationship;
                 var relationships = relationshipProperty.Deserialize<Dictionary<string, JsonElement?>>();
                 // source = 1
-                if (relationships!.TryGetValue("1", out nodeRelationship) && nodeRelationship is not null)
+                if (relationships!.TryGetValue(RelationshipType.Source.ToRelationshipKey(), out nodeRelationship) && nodeRelationship is not null)
                 {
                     node.SourceNode = CreateRelateNodeInfo(nodeRelationship.Value);
                 }
 
-                if (relationships!.TryGetValue("2", out nodeRelationship) && nodeRelationship is not null)
+                if (relationships!.TryGetValue(RelationshipType.Previous.ToRelationshipKey(), out nodeRelationship) && nodeRelationship is not null)
                 {
                     node.PreviousNode = CreateRelateNodeInfo(nodeRelationship.Value);
 
                 }
 
-                if (relationships!.TryGetValue("3", out nodeRelationship) && nodeRelationship is not null)
+                if (relationships!.TryGetValue(RelationshipType.Next.ToRelationshipKey(), out nodeRelationship) && nodeRelationship is not null)
                 {
                     node.NextNode = CreateRelateNodeInfo(nodeRelationship.Value);
 
                 }
 
-                if (relationships!.TryGetValue("4", out nodeRelationship) && nodeRelationship is not null)
+                if (relationships!.TryGetValue(RelationshipType.Parent.ToRelationshipKey(), out nodeRelationship) && nodeRelationship is not null)
                 {
                     node.ParentNode = CreateRelateNodeInfo(nodeRelationship.Value);
 
                 }
 
-                if (relationships!.TryGetValue("5", out nodeRelationship) && nodeRelationship is not null)
+                if (relationships!.TryGetValue(RelationshipType.Child.ToRelationshipKey(), out nodeRelationship) && nodeRelationship is not null)
                 {
                     var relatedNodes = new List<RelatedNodeInfo>();
                     foreach (var nodeRelationshipElement in nodeRelationship.Value.EnumerateArray())
