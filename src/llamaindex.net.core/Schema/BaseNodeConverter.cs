@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace llamaindex.net.core.Schema;
+namespace llamaindex.core.Schema;
 
 public class BaseNodeConverter : JsonConverter<BaseNode>
 {
@@ -19,13 +19,10 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
         var nodeType = root.GetProperty("_node_type").GetString();
         var nodeContentString = root.GetProperty("_node_content").GetString();
         var nodeContent = JsonDocument.Parse(nodeContentString!);
-        var documentId = GetStringPropertyValue("document_id", root);
-        var refDocId = GetStringPropertyValue("ref_doc_id", root);
-        var docId = GetStringPropertyValue("doc_id", root);
 
         var node = nodeType switch
         {
-            "TextNode" => DeserializeTextNode(nodeContent, documentId, docId, refDocId),
+            "TextNode" => DeserializeTextNode(nodeContent),
             _ => throw new NotSupportedException($"Node type {nodeType} is not supported")
         };
 
@@ -98,7 +95,7 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
         return new RelatedNodeInfo(nodeId!, nodeType, metadata);
     }
 
-    private BaseNode DeserializeTextNode(JsonDocument nodeContent, string? documentId, string? docId, string? refDocId)
+    private BaseNode DeserializeTextNode(JsonDocument nodeContent)
     {
         var root = nodeContent.RootElement;
         var id = root.GetProperty("id_").GetString();
@@ -109,7 +106,7 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
 
 
 
-        return new TextNode(id!, text:text, endCharIdx: endCharIdx, startCharIndex: startCharIndex, metadata: metadata, documentId:documentId, docId:docId, refDocId:refDocId);
+        return new TextNode(id!, text:text, endCharIdx: endCharIdx, startCharIndex: startCharIndex, metadata: metadata);
     }
 
     private static int? GetIntPropertyValue(string propertyName, JsonElement root)

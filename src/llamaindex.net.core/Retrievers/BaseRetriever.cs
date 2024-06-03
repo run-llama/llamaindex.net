@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using llamaindex.net.core.Schema;
+using llamaindex.core.Schema;
 
-namespace llamaindex.net.core.Retrievers
+namespace llamaindex.core.Retrievers
 {
     public abstract class BaseRetriever  
     {

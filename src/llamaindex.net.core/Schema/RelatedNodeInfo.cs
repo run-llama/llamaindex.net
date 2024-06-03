@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace llamaindex.net.core.Schema;
+namespace llamaindex.core.Schema;
 
 public class RelatedNodeInfo(string nodeId, NodeType nodeType, Dictionary<string, object>? metadata = null)
 {

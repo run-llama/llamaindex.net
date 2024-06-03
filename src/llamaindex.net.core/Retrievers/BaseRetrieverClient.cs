@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using llamaindex.net.core.Schema;
+using System.Threading;
+using System.Threading.Tasks;
+using llamaindex.core.Schema;
 
-namespace llamaindex.net.core.Retrievers;
+namespace llamaindex.core.Retrievers;
 
 public class RetrieverClient(Uri host, string vectorDbCollectionName) : BaseRetriever
 {

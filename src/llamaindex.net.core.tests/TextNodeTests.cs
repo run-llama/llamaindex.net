@@ -1,8 +1,8 @@
 using System.Text.Json;
 using FluentAssertions;
-using llamaindex.net.core.Schema;
+using llamaindex.core.Schema;
 
-namespace llamaindex.net.core.tests;
+namespace llamaindex.core.tests;
 
 public class TextNodeTests
 {
@@ -30,11 +30,7 @@ public class TextNodeTests
         
             new TextNode(
                 "679e7994-761b-4f49-a2fc-948f0f477c57",
-                text: "('Solomon Islands', 8)",
-     
-                docId: "123",
-                documentId:"123",
-                refDocId: "123"
+                text: "('Solomon Islands', 8)"
             )
             {
                 ParentNode = new RelatedNodeInfo("123",NodeType.Image),

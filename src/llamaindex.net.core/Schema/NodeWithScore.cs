@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace llamaindex.net.core.Schema;
+namespace llamaindex.core.Schema;
 
 public class NodeWithScore(BaseNode node, double score)
 {

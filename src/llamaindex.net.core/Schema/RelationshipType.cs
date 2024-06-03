@@ -1,4 +1,4 @@
-﻿namespace llamaindex.net.core.Schema;
+﻿namespace llamaindex.core.Schema;
 
 public enum RelationshipType
 {
