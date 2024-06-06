@@ -2,9 +2,9 @@ using System.Text.Json;
 
 using FluentAssertions;
 
-using llamaindex.core.Schema;
+using LlamaIndex.CoreSchema;
 
-namespace llamaindex.core.tests;
+namespace LlamaIndex.Coretests;
 
 public class TestNodeWithScoreTest
 {

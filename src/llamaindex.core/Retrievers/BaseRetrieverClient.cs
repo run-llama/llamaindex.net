@@ -5,9 +5,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using llamaindex.core.Schema;
+using LlamaIndex.CoreSchema;
 
-namespace llamaindex.core.Retrievers;
+namespace LlamaIndex.CoreRetrievers;
 
 public class RetrieverClient(Uri host, string vectorDbCollectionName) : BaseRetriever
 {

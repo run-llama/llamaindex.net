@@ -1,4 +1,4 @@
-﻿namespace llamaindex.core.Schema;
+﻿namespace LlamaIndex.CoreSchema;
 
 public enum NodeType
 {

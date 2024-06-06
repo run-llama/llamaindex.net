@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Llamaindex.core\Llamaindex.core.csproj" />
+    <ProjectReference Include="..\Llamaindex.Core\LlamaIndex.Core.csproj" />
   </ItemGroup>
 
 </Project>

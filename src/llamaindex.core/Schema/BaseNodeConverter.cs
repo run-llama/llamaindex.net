@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace llamaindex.core.Schema;
+namespace LlamaIndex.CoreSchema;
 
 public class BaseNodeConverter : JsonConverter<BaseNode>
 {

@@ -4,7 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using llamaindex.core.Schema;
+using LlamaIndex.CoreSchema;
 
 namespace LlamaParse;
 
