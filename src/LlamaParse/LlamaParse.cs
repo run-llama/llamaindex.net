@@ -8,16 +8,36 @@ using llamaindex.core.Schema;
 
 namespace LlamaParse;
 
-public class LlamaParse(HttpClient client)
+public partial class LlamaParse(HttpClient client)
 {
-    public Task<IEnumerable<Document>> LoadDataAsync(FileInfo file, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<Document> LoadDataAsync(FileInfo file, Dictionary<string,object>? metadata = null, CancellationToken cancellationToken = default)
     {
-        using var streamReader = new StreamReader(file.OpenRead());
-        return LoadDataAsync(streamReader, file.Name, cancellationToken);
+        return LoadDataAsync([file], metadata, cancellationToken);
+    }
+    public async IAsyncEnumerable<Document> LoadDataAsync(IEnumerable<FileInfo> files, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+    {
+        var jobs = new List<Job>();
+        foreach (var fileInfo in files)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                yield break;
+            }
+            var job = await CreateJobAsync(fileInfo, metadata, cancellationToken);
+            jobs.Add(job);
+        }
+        if (!cancellationToken.IsCancellationRequested)
+        {
+            foreach (var job in jobs)
+            {
+                yield return await job.GetResultAsync(cancellationToken);
+            }
+        }
     }
 
-    public Task<IEnumerable<Document>> LoadDataAsync(StreamReader source, string fileName, CancellationToken cancellationToken = default)
+    private Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object>? metadata, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 }
+
