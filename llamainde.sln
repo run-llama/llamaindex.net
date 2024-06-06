@@ -7,9 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{87989DE6-A7D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{CC0A7E3A-2FFA-47FB-8061-228E2CFBB140}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "llamaindex.core", "src\llamaindex.net.core\llamaindex.core.csproj", "{BA4CF140-1425-48C4-AD47-EDF203CFF214}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "llamaindex.core", "src\llamaindex.core\llamaindex.core.csproj", "{BA4CF140-1425-48C4-AD47-EDF203CFF214}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "llamaindex.core.tests", "src\llamaindex.net.core.tests\llamaindex.core.tests.csproj", "{C19A29C4-107C-4C86-A6FA-B104AC23CC79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "llamaindex.core.tests", "src\llamaindex.core.tests\llamaindex.core.tests.csproj", "{C19A29C4-107C-4C86-A6FA-B104AC23CC79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
