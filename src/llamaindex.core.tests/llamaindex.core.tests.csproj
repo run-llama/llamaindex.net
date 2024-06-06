@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\llamaindex.core\llamaindex.core.csproj" />
+    <ProjectReference Include="..\Llamaindex.core\Llamaindex.core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
