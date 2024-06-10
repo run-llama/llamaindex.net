@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -83,21 +84,15 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
         // upload file and create a job
         var languageCode = _configuration.Language.ToLanguageCode();
-        var mimeType = FileTypes.GetMimeType(fileInfo);
+        
         var uploadUri = new Uri($"{_endpoint.TrimEnd('/')}/api/parsing/upload");
         var request = new HttpRequestMessage(HttpMethod.Post, uploadUri);
-        request.Headers.Add("Authorization", $"Bearer {apiKey}");
-        var bytes = await File.ReadAllBytesAsync(fileInfo.FullName, cancellationToken);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",apiKey);
 
-        if (bytes.LongLength == 0)
-        {
-            throw new InvalidOperationException($"Failed to read file: {fileInfo.FullName}, file is empty");
-        }
+        var mimeType = FileTypes.GetMimeType(fileInfo);
+        var fileContent = new StreamContent(File.OpenRead(fileInfo.FullName));
 
-        var fileContent = new ByteArrayContent(bytes)
-        {
-            Headers = { { "Content-Type", mimeType } }
-        };
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
 
         var requestContent  = new MultipartFormDataContent
         {
@@ -109,18 +104,18 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
             { new StringContent(_configuration.DoNotUnrollColumns.ToString()), "do_not_unroll_columns" },
         };
 
-        if (_configuration.Gpt4oMode)
+        //if (_configuration.Gpt4oMode)
         {
             requestContent.Add(new StringContent(_configuration.Gpt4oMode.ToString()), "gpt4o_mode");
             requestContent.Add(new StringContent(_configuration.Gpt4oApiKey ?? string.Empty), "gpt4o_api_key");
         }
 
-        if (!string.IsNullOrWhiteSpace(_configuration.ParsingInstructions))
+        //if (!string.IsNullOrWhiteSpace(_configuration.ParsingInstructions))
         {
             requestContent.Add(new StringContent(_configuration.ParsingInstructions ?? string.Empty), "parsing_instruction");
         }
 
-        if (!string.IsNullOrWhiteSpace(_configuration.PageSeparator))
+        //if (!string.IsNullOrWhiteSpace(_configuration.PageSeparator))
         {
             requestContent.Add(new StringContent(_configuration.PageSeparator ?? string.Empty), "page_separator");
         }
