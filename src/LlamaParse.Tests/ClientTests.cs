@@ -1,5 +1,7 @@
 using Xunit.Sdk;
 using FluentAssertions;
+using LlamaIndex.Core.Schema;
+
 namespace LlamaParse.Tests;
 
 public class ClientTests
@@ -38,5 +40,22 @@ public class ClientTests
         };
 
         action.Should().ThrowExactlyAsync<FileNotFoundException>();
+    }
+
+    [Fact]
+    public async Task load_files()
+    {
+        var llamaParseClient = new LlamaParse(new HttpClient(), "llx-BYmUDF2bJeiskvkd6c9riVSKHzpcrSerxYgMsapJF4Xx7m6G");
+
+        var fileInfo = new FileInfo(@"D:\rag-data\pdfs\MetaReflexion-draft.pdf");
+
+    
+        var documents = new List<Document>();
+        await foreach (var document in llamaParseClient.LoadDataAsync(fileInfo))
+        {
+            documents.Add(document);
+        }
+
+        documents.Should().NotBeEmpty();
     }
 }

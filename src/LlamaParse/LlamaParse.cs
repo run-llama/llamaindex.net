@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-using LlamaIndex.CoreSchema;
+using LlamaIndex.Core.Schema;
 
 namespace LlamaParse;
 
@@ -37,16 +36,33 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
             var job = await CreateJobAsync(fileInfo, metadata, cancellationToken);
             jobs.Add(job);
         }
-        if (!cancellationToken.IsCancellationRequested)
+
+        if (cancellationToken.IsCancellationRequested) yield break;
+
+        foreach (var job in jobs)
         {
-            foreach (var job in jobs)
-            {
-                yield return await job.GetResultAsync(cancellationToken);
-            }
+            yield return await job.GetResultAsync(cancellationToken);
         }
+
     }
 
-    private Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object>? metadata, CancellationToken cancellationToken)
+    public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var jobId = document.Metadata["llamaparse_job_id"];
+
+        var jobResult = await GetJobResults(jobId, cancellationToken);
+
+
+        throw new NotImplementedException();
+        yield return null;
+    }
+
+    private Task<object> GetJobResults(object jobId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    private async Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object>? metadata, CancellationToken cancellationToken)
     {
         var fileInfoName = fileInfo.Name;
 
@@ -69,19 +85,55 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         var languageCode = _configuration.Language.ToLanguageCode();
         var mimeType = FileTypes.GetMimeType(fileInfo);
         var uploadUri = new Uri($"{_endpoint.TrimEnd('/')}/api/parsing/upload");
+        var request = new HttpRequestMessage(HttpMethod.Post, uploadUri);
+        request.Headers.Add("Authorization", $"Bearer {apiKey}");
+        var bytes = await File.ReadAllBytesAsync(fileInfo.FullName, cancellationToken);
 
-        var requestData = new
+        if (bytes.LongLength == 0)
         {
-            language = languageCode,
-            parsing_instruction = _configuration.ParsingInstructions,
-            skip_diagonal_text = _configuration.SkipDiagonalText,
-            do_not_cache = _configuration.DoNotCache,
-            fast_mode = _configuration.FastMode,
-            do_not_unroll_columns = _configuration.DoNotUnrollColumns,
-            page_separator = _configuration.PageSeparator,
-            gpt4o_mode = _configuration.Gpt4oMode,
-            gpt4o_api_key = _configuration.Gpt4oApiKey,
+            throw new InvalidOperationException($"Failed to read file: {fileInfo.FullName}, file is empty");
+        }
+
+        var fileContent = new ByteArrayContent(bytes)
+        {
+            Headers = { { "Content-Type", mimeType } }
         };
+
+        var requestContent  = new MultipartFormDataContent
+        {
+            { fileContent, "file", fileInfoName },
+            { new StringContent(languageCode), "language" },
+            { new StringContent(_configuration.SkipDiagonalText.ToString()), "skip_diagonal_text" },
+            { new StringContent(_configuration.DoNotCache.ToString()), "do_not_cache" },
+            { new StringContent(_configuration.FastMode.ToString()), "fast_mode" },
+            { new StringContent(_configuration.DoNotUnrollColumns.ToString()), "do_not_unroll_columns" },
+        };
+
+        if (_configuration.Gpt4oMode)
+        {
+            requestContent.Add(new StringContent(_configuration.Gpt4oMode.ToString()), "gpt4o_mode");
+            requestContent.Add(new StringContent(_configuration.Gpt4oApiKey ?? string.Empty), "gpt4o_api_key");
+        }
+
+        if (!string.IsNullOrWhiteSpace(_configuration.ParsingInstructions))
+        {
+            requestContent.Add(new StringContent(_configuration.ParsingInstructions ?? string.Empty), "parsing_instruction");
+        }
+
+        if (!string.IsNullOrWhiteSpace(_configuration.PageSeparator))
+        {
+            requestContent.Add(new StringContent(_configuration.PageSeparator ?? string.Empty), "page_separator");
+        }
+
+        request.Content = requestContent;
+        var response = await client.SendAsync(request, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}");
+        }
+
+        var jobId = await response.Content.ReadAsStringAsync();
 
         throw new NotImplementedException();
     }
