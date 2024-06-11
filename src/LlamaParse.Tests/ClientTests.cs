@@ -1,6 +1,7 @@
 using Xunit.Sdk;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
+using System.Security.Principal;
 
 namespace LlamaParse.Tests;
 
@@ -42,7 +43,7 @@ public class ClientTests
         action.Should().ThrowExactlyAsync<FileNotFoundException>();
     }
 
-    [Fact]
+    [SkipOnKeyNotFoundFact]
     public async Task load_files()
     {
         var llamaParseClient = new LlamaParse(new HttpClient(), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY")??string.Empty);
