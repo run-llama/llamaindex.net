@@ -8,6 +8,9 @@ namespace LlamaIndex.Core.Schema;
 /// </summary>
 [JsonConverter(typeof(BaseNodeConverter))]
 [JsonDerivedType(typeof(TextNode))]
+[JsonDerivedType(typeof(ImageNode))]
+[JsonDerivedType(typeof(Document))]
+[JsonDerivedType(typeof(ImageDocument))]
 public abstract class BaseNode(string id, Dictionary<string, object>? metadata = null)
 {
     /// <summary>

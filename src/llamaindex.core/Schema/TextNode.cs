@@ -16,3 +16,19 @@ public class TextNode(
     public int? StartCharIndex { get; } = startCharIndex;
     public int? EndCharIdx { get; } = endCharIdx;
 }
+
+[JsonConverter(typeof(BaseNodeConverter))]
+public class ImageNode(
+    string id,
+    string? image = null,
+    string? imagePath = null,
+    string? imageUrl = null,
+    string? imageMimetype = null,
+    Dictionary<string, object>? metadata = null)
+    : BaseNode(id, metadata)
+{
+    public string? Image { get; } = image;
+    public string? ImagePath { get; } = imagePath;
+    public string? ImageUrl { get; } = imageUrl;
+    public string? ImageMimetype { get; } = imageMimetype;
+}
