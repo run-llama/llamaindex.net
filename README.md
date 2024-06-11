@@ -1,2 +1,2 @@
 # llamaindex.net
-llamaindex interafce for .net
+llamaindex interfaces for .net
