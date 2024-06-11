@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace LlamaIndex.CoreSchema;
+namespace LlamaIndex.Core.Schema;
 
 [JsonConverter(typeof(BaseNodeConverter))]
 public class TextNode(

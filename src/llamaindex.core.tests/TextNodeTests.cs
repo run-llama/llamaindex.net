@@ -1,8 +1,8 @@
 using System.Text.Json;
 using FluentAssertions;
-using LlamaIndex.CoreSchema;
+using LlamaIndex.Core.Schema;
 
-namespace LlamaIndex.Coretests;
+namespace LlamaIndex.Core.Tests;
 
 public class TextNodeTests
 {

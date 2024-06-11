@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using LlamaIndex.CoreSchema;
+using LlamaIndex.Core.Schema;
 
-namespace LlamaIndex.CoreRetrievers
+namespace LlamaIndex.Core.Retrievers
 {
     public abstract class BaseRetriever  
     {

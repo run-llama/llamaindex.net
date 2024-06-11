@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace LlamaIndex.CoreSchema;
+namespace LlamaIndex.Core.Schema;
 
 /// <summary>
 /// The BaseNode class is an abstract base class that represents a node in a graph.

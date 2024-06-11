@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using LlamaIndex.Core.Schema;
-using LlamaIndex.CoreSchema;
 
 namespace LlamaParse;
 

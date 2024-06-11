@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LlamaIndex.CoreSchema;
+namespace LlamaIndex.Core.Schema;
 
 public enum RelationshipType
 {

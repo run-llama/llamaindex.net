@@ -1,10 +1,8 @@
 using System.Text.Json;
-
 using FluentAssertions;
+using LlamaIndex.Core.Schema;
 
-using LlamaIndex.CoreSchema;
-
-namespace LlamaIndex.Coretests;
+namespace LlamaIndex.Core.Tests;
 
 public class TestNodeWithScoreTest
 {
