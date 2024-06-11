@@ -1,6 +1,7 @@
 using Xunit.Sdk;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
+using System.Security.Principal;
 
 namespace LlamaParse.Tests;
 
@@ -42,12 +43,12 @@ public class ClientTests
         action.Should().ThrowExactlyAsync<FileNotFoundException>();
     }
 
-    [Fact]
+    [SkipOnKeyNotFoundFact]
     public async Task load_files()
     {
-        var llamaParseClient = new LlamaParse(new HttpClient(), "llx-BYmUDF2bJeiskvkd6c9riVSKHzpcrSerxYgMsapJF4Xx7m6G");
+        var llamaParseClient = new LlamaParse(new HttpClient(), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY")??string.Empty);
 
-        var fileInfo = new FileInfo(@"D:\rag-data\pdfs\MetaReflexion-draft.pdf");
+        var fileInfo = new FileInfo(@"D:/Repos/public/llama_parse/tests/test_files/attention_is_all_you_need.pdf");
 
     
         var documents = new List<Document>();
