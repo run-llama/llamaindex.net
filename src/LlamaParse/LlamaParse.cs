@@ -109,13 +109,11 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         {
             formData.Add(new StringContent(_configuration.Gpt4oApiKey ?? string.Empty), "gpt4o_api_key");
         }
-
-        var request = new HttpRequestMessage(HttpMethod.Post, uploadUri);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        request.Content = formData;
         
-        var response = await client.SendAsync(request, cancellationToken);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        var response = await client.PostAsync(uploadUri, content: formData, cancellationToken);
+
 
         if (!response.IsSuccessStatusCode)
         {
