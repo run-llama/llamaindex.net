@@ -14,12 +14,12 @@ namespace LlamaParse;
 
 public partial class LlamaParse(HttpClient client, string apiKey, string? endpoint = null, Configuration? configuration = null)
 {
+    private const string LlamaparseJobId = "llamaparse_job_id";
+
     private readonly string _endpoint = string.IsNullOrWhiteSpace(endpoint)
             ? "https://api.cloud.llamaindex.ai"
             : endpoint;
     private readonly Configuration _configuration = configuration ?? new Configuration();
-
-
 
     public IAsyncEnumerable<Document> LoadDataAsync(FileInfo file, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
@@ -49,7 +49,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
     public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var jobId = document.Metadata["llamaparse_job_id"];
+        var jobId = document.Metadata[LlamaparseJobId];
 
         var jobResult = await GetJobResults(jobId, cancellationToken);
 
@@ -109,7 +109,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         {
             formData.Add(new StringContent(_configuration.Gpt4oApiKey ?? string.Empty), "gpt4o_api_key");
         }
-        
+
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         var response = await client.PostAsync(uploadUri, content: formData, cancellationToken);
