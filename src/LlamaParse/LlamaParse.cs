@@ -42,7 +42,21 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
         foreach (var job in jobs)
         {
-            yield return await job.GetResultAsync(cancellationToken);
+            var document = await job.GetResultAsync(cancellationToken);
+            if (_configuration.SplitByPage)
+            {
+                var chunks = document.Text?.Split("\n---\n", StringSplitOptions.RemoveEmptyEntries) ??
+                             [];
+
+               foreach (var chunk in chunks)
+                {
+                    yield return new Document(document.Id, chunk, new Dictionary<string, object>( document.Metadata));
+                }
+            }
+            else
+            {
+                yield return document;
+            }
         }
 
     }

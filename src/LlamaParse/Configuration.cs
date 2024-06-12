@@ -9,7 +9,8 @@ public class Configuration(
     bool doNotUnrollColumns = false,
     string? pageSeparator = null,
     bool gpt4oMode = false,
-    string? gpt4oApiKey = null)
+    string? gpt4oApiKey = null,
+    bool splitByPage = false)
 {
     public Languages Language { get; } = language;
     public string? ParsingInstructions { get; } = parsingInstructions;
@@ -20,4 +21,5 @@ public class Configuration(
     public string? PageSeparator { get; } = pageSeparator;
     public bool Gpt4oMode { get; } = gpt4oMode;
     public string? Gpt4oApiKey { get; } = gpt4oApiKey;
+    public bool SplitByPage { get; } = splitByPage;
 }
