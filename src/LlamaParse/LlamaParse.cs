@@ -119,36 +119,45 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
 
         // upload file and create a job
-        var languageCode = _configuration.Language.ToLanguageCode();
-
         var uploadUri = new Uri($"{_endpoint.TrimEnd('/')}/api/parsing/upload");
 
         var mimeType = FileTypes.GetMimeType(fileInfo);
-        var fileContent = new StreamContent(File.OpenRead(fileInfo.FullName));
+        var form = new MultipartFormDataContent();
+        var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
+        
+        //  Set up the file content
+        var fileContent = new StreamContent(fileStream);
+        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
+        form.Add(fileContent, "file", Path.GetFileName(fileInfo.FullName));
 
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue(mimeType);
+        // Add additional configuration to form data
+        form.Add(new StringContent(_configuration.Language.ToLanguageCode()), "language");
 
-        var formData = new MultipartFormDataContent
+        if (!string.IsNullOrWhiteSpace(_configuration.ParsingInstructions))
         {
-            { fileContent, "file", fileInfoName },
-            { new StringContent(languageCode), "language" },
-            { new StringContent(_configuration.SkipDiagonalText.ToString()), "skip_diagonal_text" },
-            { new StringContent(_configuration.DoNotCache.ToString()), "do_not_cache" },
-            { new StringContent(_configuration.FastMode.ToString()), "fast_mode" },
-            { new StringContent(_configuration.DoNotUnrollColumns.ToString()), "do_not_unroll_columns" },
-            { new StringContent(_configuration.ParsingInstructions ?? string.Empty), "parsing_instruction" },
-            { new StringContent(_configuration.PageSeparator ?? string.Empty), "page_separator"},
-            { new StringContent(_configuration.Gpt4oMode.ToString()), "gpt4o_mode"}
-        };
+            form.Add(new StringContent(_configuration.ParsingInstructions), "parsing_instruction");
+        }
+
+        form.Add(new StringContent(_configuration.InvalidateCache.ToString()), "invalidate_cache");
+        form.Add(new StringContent(_configuration.SkipDiagonalText.ToString()), "skip_diagonal_text");
+        form.Add(new StringContent(_configuration.DoNotCache.ToString()), "do_not_cache");
+        form.Add(new StringContent(_configuration.FastMode.ToString()), "fast_mode");
+        form.Add(new StringContent(_configuration.DoNotUnrollColumns.ToString()), "do_not_unroll_columns");
+
+        if (!string.IsNullOrWhiteSpace(_configuration.ParsingInstructions))
+        {
+            form.Add(new StringContent(_configuration.PageSeparator), "page_separator");
+        }
+
+        form.Add(new StringContent(_configuration.Gpt4oMode.ToString()), "gpt4o_mode");
 
         if (_configuration.Gpt4oMode)
         {
-            formData.Add(new StringContent(_configuration.Gpt4oApiKey ?? string.Empty), "gpt4o_api_key");
+            form.Add(new StringContent(_configuration.Gpt4oApiKey), "gpt4o_api_key");
         }
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        var response = await client.PostAsync(uploadUri, content: formData, cancellationToken);
+        var response = await client.PostAsync(uploadUri, content: form, cancellationToken);
 
 
         if (!response.IsSuccessStatusCode)

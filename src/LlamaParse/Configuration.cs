@@ -4,6 +4,7 @@ public class Configuration(
     Languages language = Languages.English,
     string? parsingInstructions = null,
     bool skipDiagonalText = false,
+    bool invalidateCache = false,
     bool doNotCache = false,
     bool fastMode = false,
     bool doNotUnrollColumns = false,
@@ -16,6 +17,7 @@ public class Configuration(
     public Languages Language { get; } = language;
     public string? ParsingInstructions { get; } = parsingInstructions;
     public bool SkipDiagonalText { get; } = skipDiagonalText;
+    public bool InvalidateCache { get; } = invalidateCache;
     public bool DoNotCache { get; } = doNotCache;
     public bool FastMode { get; } = fastMode;
     public bool DoNotUnrollColumns { get; } = doNotUnrollColumns;
