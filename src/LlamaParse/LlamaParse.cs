@@ -124,11 +124,11 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         var mimeType = FileTypes.GetMimeType(fileInfo);
         var form = new MultipartFormDataContent();
         var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
-        
+
         //  Set up the file content
         var fileContent = new StreamContent(fileStream);
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
-        form.Add(fileContent, "file", Path.GetFileName(fileInfo.FullName));
+        form.Add(fileContent, "file", fileInfo.FullName);
 
         // Add additional configuration to form data
         form.Add(new StringContent(_configuration.Language.ToLanguageCode()), "language");
@@ -155,13 +155,23 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         {
             form.Add(new StringContent(_configuration.Gpt4oApiKey), "gpt4o_api_key");
         }
+        var request = new HttpRequestMessage(HttpMethod.Post, uploadUri);
+        request.Content = form;
+        // delete this header!
+        fileContent.Headers.ContentDisposition.FileNameStar = string.Empty;
 
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-        var response = await client.PostAsync(uploadUri, content: form, cancellationToken);
+        request.Headers.Add("Authorization", $"Bearer {apiKey}");
 
+        var response = await client.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
+            if (response.Content != null)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}. Error: {error}");
+            }
+
             throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}");
         }
 
