@@ -45,12 +45,24 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
             var document = await job.GetResultAsync(cancellationToken);
             if (_configuration.SplitByPage)
             {
-                var chunks = document.Text?.Split("\n---\n", StringSplitOptions.RemoveEmptyEntries) ??
+                var chunks = document.Text?.Split("\n---\n") ??
                              [];
-
-               foreach (var chunk in chunks)
+                var pageCount = 0;
+                foreach (var chunk in chunks)
                 {
-                    yield return new Document(document.Id, chunk, new Dictionary<string, object>(document.Metadata));
+                    pageCount++;
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        yield break;
+                    }
+                    if (string.IsNullOrWhiteSpace(chunk))
+                    {
+                        continue;
+                    }
+                    yield return new Document(document.Id, chunk, new Dictionary<string, object>(document.Metadata)
+                    {
+                        ["page_number"] = pageCount
+                    });
                 }
             }
             else
