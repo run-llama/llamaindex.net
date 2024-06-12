@@ -14,7 +14,7 @@ namespace LlamaParse;
 
 public partial class LlamaParse(HttpClient client, string apiKey, string? endpoint = null, Configuration? configuration = null)
 {
-    private const string LlamaparseJobId = "llamaparse_job_id";
+    private const string LlamaParseJobIdMetadataKey = "llamaparse_job_id";
 
     private readonly string _endpoint = string.IsNullOrWhiteSpace(endpoint)
             ? "https://api.cloud.llamaindex.ai"
@@ -62,7 +62,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
             {
                 await foreach (var image in LoadImagesAsync(document, cancellationToken))
                 {
-                    yield return new Document(document.Id, null, new Dictionary<string, object>(document.Metadata));
+                    yield return image;
                 }
             }
         }
@@ -71,9 +71,11 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
     public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var jobId = document.Metadata[LlamaparseJobId];
+        var jobId = document.Metadata[LlamaParseJobIdMetadataKey];
 
         var jobResult = await GetJobResults(jobId, cancellationToken);
+
+        var metadata = new Dictionary<string, object>(document.Metadata);
 
 
         throw new NotImplementedException();
