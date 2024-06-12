@@ -50,12 +50,20 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
                foreach (var chunk in chunks)
                 {
-                    yield return new Document(document.Id, chunk, new Dictionary<string, object>( document.Metadata));
+                    yield return new Document(document.Id, chunk, new Dictionary<string, object>(document.Metadata));
                 }
             }
             else
             {
                 yield return document;
+            }
+
+            if (_configuration.ExtractImages)
+            {
+                await foreach (var image in LoadImagesAsync(document, cancellationToken))
+                {
+                    yield return new Document(document.Id, null, new Dictionary<string, object>(document.Metadata));
+                }
             }
         }
 
