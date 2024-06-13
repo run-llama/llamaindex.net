@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -128,7 +129,11 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         //  Set up the file content
         var fileContent = new StreamContent(fileStream);
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
-        form.Add(fileContent, "file", fileInfo.FullName);
+
+        fileContent.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(
+            $"form-data; name=\"file\"; filename=\"{fileInfo.Name}\"");
+
+        form.Add(fileContent);
 
         // Add additional configuration to form data
         form.Add(new StringContent(_configuration.Language.ToLanguageCode()), "language");
@@ -155,11 +160,10 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         {
             form.Add(new StringContent(_configuration.Gpt4oApiKey), "gpt4o_api_key");
         }
+
         var request = new HttpRequestMessage(HttpMethod.Post, uploadUri);
         request.Content = form;
-        // delete this header!
-        fileContent.Headers.ContentDisposition.FileNameStar = string.Empty;
-
+        
         request.Headers.Add("Authorization", $"Bearer {apiKey}");
 
         var response = await client.SendAsync(request, cancellationToken);
@@ -175,8 +179,15 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
             throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}");
         }
 
-        var jobId = await response.Content.ReadAsStringAsync();
+        var responseBody =  await response.Content.ReadAsStringAsync();
 
-        throw new NotImplementedException();
+        var jobCreationResult = JsonDocument.Parse(responseBody).RootElement;
+
+        var id = jobCreationResult.GetProperty("id").GetString();
+        var status = jobCreationResult.GetProperty("status").GetString();
+
+        var job = new Job(client, fileInfo, documentMetadata, id!, status!, _endpoint, _configuration.ResultType, apiKey);
+
+        return job;
     }
 }

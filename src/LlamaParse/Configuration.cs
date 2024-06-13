@@ -12,7 +12,8 @@ public class Configuration(
     bool gpt4oMode = false,
     string? gpt4oApiKey = null,
     bool splitByPage = false,
-    bool extractImages = false)
+    bool extractImages = false,
+    ResultType resultType = default)
 {
     public Languages Language { get; } = language;
     public string? ParsingInstructions { get; } = parsingInstructions;
@@ -26,4 +27,5 @@ public class Configuration(
     public string? Gpt4oApiKey { get; } = gpt4oApiKey;
     public bool SplitByPage { get; } = splitByPage;
     public bool ExtractImages { get; } = extractImages;
+    public ResultType ResultType { get; } = resultType;
 }
