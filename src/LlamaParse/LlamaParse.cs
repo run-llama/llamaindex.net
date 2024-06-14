@@ -83,13 +83,14 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         }
     }
 
-    public IAsyncEnumerable<JsonElement> LoadDataRawAsync(FileInfo file, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<JsonElement> LoadDataRawAsync(FileInfo file, ResultType? resultType = null, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
-        return LoadDataRawAsync([file], metadata, cancellationToken);
+        return LoadDataRawAsync([file], resultType, metadata, cancellationToken);
     }
 
     public async IAsyncEnumerable<JsonElement> LoadDataRawAsync(IEnumerable<FileInfo> files,
-        Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+        ResultType? resultType = null,
+        Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var jobs = new List<Job>();
         foreach (var fileInfo in files)
@@ -107,7 +108,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
         foreach (var job in jobs)
         {
-            var result = await job.GetRawResult(cancellationToken);
+            var result = await job.GetRawResult(resultType?? _configuration.ResultType, cancellationToken);
             yield return result;
         }
     }

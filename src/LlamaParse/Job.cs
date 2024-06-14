@@ -22,11 +22,17 @@ public partial class LlamaParse
             [LlamaParseJobIdMetadataKey] = id
         };
 
-        public async Task<JsonElement> GetRawResult(CancellationToken cancellationToken)
+        public async Task<JsonElement> GetRawResult(ResultType type, CancellationToken cancellationToken)
         {
             await WaitForJobToCompleteAsync(cancellationToken);
-            return await client.GetJobResultAsync(id, resultType, cancellationToken);
+            return await client.GetJobResultAsync(id, type, cancellationToken);
         }
+
+        public  Task<JsonElement> GetRawResult( CancellationToken cancellationToken)
+        {
+            return GetRawResult(resultType, cancellationToken);
+        }
+
         public async Task<Document> GetDocumentAsync(CancellationToken cancellationToken)
         {
             await WaitForJobToCompleteAsync(cancellationToken);
