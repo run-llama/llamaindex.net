@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
 using System.Text;
@@ -89,9 +90,12 @@ public class ClientTests
 
 public class LoggingHandler : DelegatingHandler
 {
-    public LoggingHandler(HttpMessageHandler innerHandler)
+    private readonly string _name;
+
+    public LoggingHandler(HttpMessageHandler innerHandler,[CallerMemberName] string name = "")
         : base(innerHandler)
     {
+        _name = name;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -104,7 +108,7 @@ public class LoggingHandler : DelegatingHandler
             log.AppendLine(await request.Content.ReadAsStringAsync(cancellationToken));
         }
         log.AppendLine();
-        await File.WriteAllTextAsync(@"D:\log_request_message.txt", log.ToString(), cancellationToken);
+        await File.WriteAllTextAsync(@$"D:\log_request_message_{_name}.txt", log.ToString(), cancellationToken);
 
         log.Clear();
         var response = await base.SendAsync(request, cancellationToken);
@@ -118,7 +122,7 @@ public class LoggingHandler : DelegatingHandler
         log.AppendLine();
 
         var message = log.ToString();
-        await File.WriteAllTextAsync(@"D:\log_reponse_message.txt", message, cancellationToken); 
+        await File.WriteAllTextAsync($@"D:\log_response_message_{_name}.txt", message, cancellationToken); 
         return response;
     }
 }
