@@ -101,24 +101,24 @@ public class LoggingHandler : DelegatingHandler
         log.AppendLine(request.ToString());
         if (request.Content != null)
         {
-            log.AppendLine(await request.Content.ReadAsStringAsync());
+            log.AppendLine(await request.Content.ReadAsStringAsync(cancellationToken));
         }
         log.AppendLine();
-        File.WriteAllText(@"D:\log_request_message.txt", log.ToString());
+        await File.WriteAllTextAsync(@"D:\log_request_message.txt", log.ToString(), cancellationToken);
 
         log.Clear();
-        HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+        var response = await base.SendAsync(request, cancellationToken);
 
         log.AppendLine("Response:");
         log.AppendLine(response.ToString());
         if (response.Content != null)
         {
-            log.AppendLine(await response.Content.ReadAsStringAsync());
+            log.AppendLine(await response.Content.ReadAsStringAsync(cancellationToken));
         }
         log.AppendLine();
 
         var message = log.ToString();
-        File.WriteAllText(@"D:\log_reponse_message.txt", message); 
+        await File.WriteAllTextAsync(@"D:\log_reponse_message.txt", message, cancellationToken); 
         return response;
     }
 }
