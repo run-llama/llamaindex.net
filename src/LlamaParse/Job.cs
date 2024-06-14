@@ -138,9 +138,7 @@ public partial class LlamaParse
                     var name = imageElement.GetProperty("name").GetString();
                     var width = imageElement.GetProperty("width").GetInt32();
                     var height = imageElement.GetProperty("height").GetInt32();
-
                     var content = await client.GetImage(id, name!, cancellationToken);
-
 
                     var pageMetadata = new Dictionary<string, object>(metadata)
                     {

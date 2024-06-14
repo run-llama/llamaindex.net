@@ -124,7 +124,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
     {
         var metadata = documentMetadata?.ToDictionary(e => e.Key, e => e.Value) ?? new Dictionary<string, object>();
 
-        var job = new Job(_client, metadata, jobId.ToString(), ResultType.Json);
+        var job = new Job(_client, metadata, jobId, ResultType.Json);
 
         await foreach (var image in job.GetImagesAsync(cancellationToken))
         {
