@@ -48,7 +48,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
             var document = await job.GetDocumentAsync(cancellationToken);
             if (_configuration.SplitByPage)
             {
-                var chunks = document.Text?.Split("\n---\n") ??
+                var chunks = document.Text?.Split(["\n---\n"], StringSplitOptions.None) ??
                              [];
                 var pageCount = 0;
                 foreach (var chunk in chunks)

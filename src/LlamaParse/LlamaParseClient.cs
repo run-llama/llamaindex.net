@@ -28,9 +28,9 @@ internal class LlamaParseClient(HttpClient client, string apiKey, string endpoin
         request.Headers.Add("Authorization", $"Bearer {apiKey}");
         var response = await client.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
-        var statusString = await response.Content.ReadAsStringAsync();
-        var status1 = JsonDocument.Parse(statusString).RootElement.GetProperty("status").GetString();
-        return Enum.Parse<JobStatus>(status1!, true);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var statusString = JsonDocument.Parse(responseContent).RootElement.GetProperty("status").GetString();
+        return (JobStatus)Enum.Parse(typeof(JobStatus), statusString!, true);
 
     }
     public async Task<JsonElement> GetJobResultAsync(string jobId, ResultType resultType, CancellationToken cancellationToken)
