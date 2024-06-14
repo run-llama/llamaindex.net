@@ -1,7 +1,5 @@
-using Xunit.Sdk;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
-using System.Security.Principal;
 using System.Text;
 using SkiaSharp;
 
@@ -61,6 +59,8 @@ public class ClientTests
 
         documents.Should().NotBeEmpty();
     }
+
+
 
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_with_images()

@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 using LlamaIndex.Core.Schema;
+
 
 namespace LlamaParse;
 
@@ -17,10 +16,11 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 {
     private const string LlamaParseJobIdMetadataKey = "job_id";
 
-    private readonly string _endpoint = string.IsNullOrWhiteSpace(endpoint)
-            ? "https://api.cloud.llamaindex.ai"
-            : endpoint;
     private readonly Configuration _configuration = configuration ?? new Configuration();
+
+    private readonly LlamaParseClient client = new LlamaParseClient(client, apiKey, string.IsNullOrWhiteSpace(endpoint)
+        ? "https://api.cloud.llamaindex.ai"
+        : endpoint);
 
     public IAsyncEnumerable<Document> LoadDataAsync(FileInfo file, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
@@ -86,7 +86,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
     {
         var jobId = document.Metadata[LlamaParseJobIdMetadataKey];
 
-        var job = new Job(client, document.Metadata, jobId.ToString(),  _endpoint, ResultType.Json, apiKey);
+        var job = new Job(client, document.Metadata, jobId.ToString(), ResultType.Json);
 
         await foreach (var image in job.GetImagesAsync(cancellationToken))
         {
@@ -118,73 +118,9 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         documentMetadata["file_path"] = fileInfoName;
 
 
-        // upload file and create a job
-        var uploadUri = new Uri($"{_endpoint.TrimEnd('/')}/api/parsing/upload");
+        var id = await client.CreateJob(fileInfo, _configuration, cancellationToken);
 
-        var mimeType = FileTypes.GetMimeType(fileInfo);
-        var form = new MultipartFormDataContent();
-        var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
-
-        //  Set up the file content
-        var fileContent = new StreamContent(fileStream);
-        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
-
-        fileContent.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(
-            $"form-data; name=\"file\"; filename=\"{fileInfo.Name}\"");
-
-        form.Add(fileContent);
-
-        // Add additional configuration to form data
-        form.Add(new StringContent(_configuration.Language.ToLanguageCode()), "language");
-
-        if (!string.IsNullOrWhiteSpace(_configuration.ParsingInstructions))
-        {
-            form.Add(new StringContent(_configuration.ParsingInstructions), "parsing_instruction");
-        }
-
-        form.Add(new StringContent(_configuration.InvalidateCache.ToString()), "invalidate_cache");
-        form.Add(new StringContent(_configuration.SkipDiagonalText.ToString()), "skip_diagonal_text");
-        form.Add(new StringContent(_configuration.DoNotCache.ToString()), "do_not_cache");
-        form.Add(new StringContent(_configuration.FastMode.ToString()), "fast_mode");
-        form.Add(new StringContent(_configuration.DoNotUnrollColumns.ToString()), "do_not_unroll_columns");
-
-        if (!string.IsNullOrWhiteSpace(_configuration.ParsingInstructions))
-        {
-            form.Add(new StringContent(_configuration.PageSeparator), "page_separator");
-        }
-
-        form.Add(new StringContent(_configuration.Gpt4oMode.ToString()), "gpt4o_mode");
-
-        if (_configuration.Gpt4oMode)
-        {
-            form.Add(new StringContent(_configuration.Gpt4oApiKey), "gpt4o_api_key");
-        }
-
-        var request = new HttpRequestMessage(HttpMethod.Post, uploadUri);
-        request.Content = form;
-        
-        request.Headers.Add("Authorization", $"Bearer {apiKey}");
-
-        var response = await client.SendAsync(request, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            if (response.Content != null)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}. Error: {error}");
-            }
-
-            throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}");
-        }
-
-        var responseBody =  await response.Content.ReadAsStringAsync();
-
-        var jobCreationResult = JsonDocument.Parse(responseBody).RootElement;
-
-        var id = jobCreationResult.GetProperty("id").GetString();
-
-        var job = new Job(client, documentMetadata, id!, _endpoint, _configuration.ResultType, apiKey);
+        var job = new Job(client, documentMetadata, id, _configuration.ResultType);
 
         return job;
     }

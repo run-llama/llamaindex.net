@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,57 +11,24 @@ namespace LlamaParse;
 
 public partial class LlamaParse
 {
-    private enum JobStatus
-    {
-        Pending = 0,
-        Success,
-        Cancelled,
-        Error
-    }
-
-    private class Job(
-        HttpClient client,
+   private class Job(
+        LlamaParseClient client,
         Dictionary<string, object> metadata,
         string id,
-        string endpoint,
-        ResultType resultType,
-        string apiKey)
+        ResultType resultType)
     {
+
 
         private readonly Dictionary<string, object> _metadata = new(metadata)
         {
             [LlamaParseJobIdMetadataKey] = id
         };
 
-        private async Task<JsonElement> GetJobResultAsync(CancellationToken cancellationToken)
-        {
-            var getResultUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{id}/result/{resultType.ToString().ToLowerInvariant()}");
-            var request = new HttpRequestMessage(HttpMethod.Get, getResultUri);
-            request.Headers.Add("Authorization", $"Bearer {apiKey}");
-            var response = await client.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
-            var resultString = await response.Content.ReadAsStringAsync();
-            return JsonDocument.Parse(resultString).RootElement;
-        }
-
-        private async Task<JobStatus> GetJobStatusAsync(CancellationToken cancellationToken)
-        {
-            var getStatusUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{id}");
-            var request = new HttpRequestMessage(HttpMethod.Get, getStatusUri);
-            request.Headers.Add("Authorization", $"Bearer {apiKey}");
-            var response = await client.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
-            var statusString = await response.Content.ReadAsStringAsync();
-            var status1 = JsonDocument.Parse(statusString).RootElement.GetProperty("status").GetString();
-            return Enum.Parse<JobStatus>(status1!, true);
-
-        }
-
         public async Task<Document> GetDocumentAsync(CancellationToken cancellationToken)
         {
             await WaitForJobToCompleteAsync(cancellationToken);
 
-            var results = await GetJobResultAsync(cancellationToken);
+            var results = await client.GetJobResultAsync(id, resultType, cancellationToken);
             switch (resultType)
             {
                 case ResultType.Markdown:
@@ -114,7 +81,7 @@ public partial class LlamaParse
 
         private async Task WaitForJobToCompleteAsync(CancellationToken cancellationToken)
         {
-            var status = await GetJobStatusAsync(cancellationToken);
+            var status = await client.GetJobStatusAsync(id, cancellationToken);
             while (status == JobStatus.Pending)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -123,7 +90,7 @@ public partial class LlamaParse
                 }
                 
                 await Task.Delay(1000, cancellationToken);
-                status = await GetJobStatusAsync(cancellationToken);
+                status = await client.GetJobStatusAsync(id, cancellationToken);
             }
 
             switch (status)
@@ -135,7 +102,7 @@ public partial class LlamaParse
             }
         }
 
-        public async IAsyncEnumerable<ImageDocument> GetImagesAsync(CancellationToken cancellationToken)
+        public async IAsyncEnumerable<ImageDocument> GetImagesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
         {
             await WaitForJobToCompleteAsync(cancellationToken);
 
@@ -143,7 +110,7 @@ public partial class LlamaParse
             {
                 throw new InvalidOperationException("Images can only be extracted from JSON results.");
             }
-            var results = await GetJobResultAsync(cancellationToken);
+            var results = await client.GetJobResultAsync(id, resultType, cancellationToken);
             foreach (var pageElement in results.GetProperty("pages").EnumerateArray())
             {
                 var pageNumber = pageElement.GetProperty("page").GetInt32();
@@ -152,13 +119,8 @@ public partial class LlamaParse
                     var name = imageElement.GetProperty("name").GetString();
                     var width = imageElement.GetProperty("width").GetInt32();
                     var height = imageElement.GetProperty("height").GetInt32();
-                    var getImageUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{id}/result/image/{name!}");
-                    var request = new HttpRequestMessage(HttpMethod.Get, getImageUri);
-                    request.Headers.Add("Authorization", $"Bearer {apiKey}");
-                    var response = await client.SendAsync(request, cancellationToken);
-                    response.EnsureSuccessStatusCode();
 
-                    var content  = await response.Content.ReadAsByteArrayAsync();
+                    var content = await client.GetImage(id, name!, cancellationToken);
 
 
                     var pageMetadata = new Dictionary<string, object>(metadata)
