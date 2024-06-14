@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,6 +27,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
     {
         return LoadDataAsync([file], metadata, cancellationToken);
     }
+
     public async IAsyncEnumerable<Document> LoadDataAsync(IEnumerable<FileInfo> files, Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var jobs = new List<Job>();
@@ -79,7 +81,35 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
                 }
             }
         }
+    }
 
+    public IAsyncEnumerable<JsonElement> LoadDataRawAsync(FileInfo file, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+    {
+        return LoadDataRawAsync([file], metadata, cancellationToken);
+    }
+
+    public async IAsyncEnumerable<JsonElement> LoadDataRawAsync(IEnumerable<FileInfo> files,
+        Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+    {
+        var jobs = new List<Job>();
+        foreach (var fileInfo in files)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                yield break;
+            }
+
+            var job = await CreateJobAsync(fileInfo, metadata, cancellationToken);
+            jobs.Add(job);
+        }
+
+        if (cancellationToken.IsCancellationRequested) yield break;
+
+        foreach (var job in jobs)
+        {
+            var result = await job.GetRawResult(cancellationToken);
+            yield return result;
+        }
     }
 
     public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -94,10 +124,6 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         }
     }
 
-    private Task<object> GetJobResults(object jobId, ResultType resulType, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 
     private async Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object>? metadata, CancellationToken cancellationToken)
     {

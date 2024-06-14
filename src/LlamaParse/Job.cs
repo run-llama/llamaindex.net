@@ -17,13 +17,16 @@ public partial class LlamaParse
         string id,
         ResultType resultType)
     {
-
-
         private readonly Dictionary<string, object> _metadata = new(metadata)
         {
             [LlamaParseJobIdMetadataKey] = id
         };
 
+        public async Task<JsonElement> GetRawResult(CancellationToken cancellationToken)
+        {
+            await WaitForJobToCompleteAsync(cancellationToken);
+            return await client.GetJobResultAsync(id, resultType, cancellationToken);
+        }
         public async Task<Document> GetDocumentAsync(CancellationToken cancellationToken)
         {
             await WaitForJobToCompleteAsync(cancellationToken);
