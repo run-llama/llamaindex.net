@@ -113,11 +113,18 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         }
     }
 
-    public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, CancellationToken cancellationToken = default)
     {
         var jobId = document.Metadata[LlamaParseJobIdMetadataKey];
+        
+        return LoadImagesAsync(jobId.ToString(), document.Metadata, cancellationToken);
+    }
 
-        var job = new Job(_client, document.Metadata, jobId.ToString(), ResultType.Json);
+    public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(string jobId, Dictionary<string, object>? documentMetadata = null ,[EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var metadata = documentMetadata?.ToDictionary(e => e.Key, e => e.Value) ?? new Dictionary<string, object>();
+
+        var job = new Job(_client, metadata, jobId.ToString(), ResultType.Json);
 
         await foreach (var image in job.GetImagesAsync(cancellationToken))
         {
