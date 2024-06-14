@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
 using System.Text;
+using System.Text.Json;
 using SkiaSharp;
 
 namespace LlamaParse.Tests;
@@ -61,7 +62,56 @@ public class ClientTests
         documents.Should().NotBeEmpty();
     }
 
+    [SkipOnKeyNotFoundFact]
+    public async Task can_load_pdf_as_markdown()
+    {
+        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
 
+        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
+
+
+        var documents = new List<JsonElement>();
+        await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo, ResultType.Markdown))
+        {
+            documents.Add(document);
+        }
+
+        documents.Should().NotBeEmpty();
+    }
+
+    [SkipOnKeyNotFoundFact]
+    public async Task can_load_pdf_as_text()
+    {
+        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
+
+        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
+
+
+        var documents = new List<JsonElement>();
+        await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo, ResultType.Text))
+        {
+            documents.Add(document);
+        }
+
+        documents.Should().NotBeEmpty();
+    }
+
+    [SkipOnKeyNotFoundFact]
+    public async Task can_load_pdf_as_json()
+    {
+        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
+
+        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
+
+
+        var documents = new List<JsonElement>();
+        await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo, ResultType.Json))
+        {
+            documents.Add(document);
+        }
+
+        documents.Should().NotBeEmpty();
+    }
 
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_with_images()

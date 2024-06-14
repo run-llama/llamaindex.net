@@ -4,9 +4,6 @@
       <NamedTestSelector>
         <TestName>LlamaParse.Tests.ClientTests.load_files</TestName>
       </NamedTestSelector>
-      <NamedTestSelector>
-        <TestName>LlamaParse.Tests.ClientTests.can_load_pdf</TestName>
-      </NamedTestSelector>
     </IgnoredTests>
   </Settings>
 </ProjectConfiguration>
