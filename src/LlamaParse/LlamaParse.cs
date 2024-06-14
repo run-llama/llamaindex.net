@@ -15,7 +15,7 @@ namespace LlamaParse;
 
 public partial class LlamaParse(HttpClient client, string apiKey, string? endpoint = null, Configuration? configuration = null)
 {
-    private const string LlamaParseJobIdMetadataKey = "llamaparse_job_id";
+    private const string LlamaParseJobIdMetadataKey = "job_id";
 
     private readonly string _endpoint = string.IsNullOrWhiteSpace(endpoint)
             ? "https://api.cloud.llamaindex.ai"
@@ -43,7 +43,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
         foreach (var job in jobs)
         {
-            var document = await job.GetResultAsync(cancellationToken);
+            var document = await job.GetDocumentAsync(cancellationToken);
             if (_configuration.SplitByPage)
             {
                 var chunks = document.Text?.Split("\n---\n") ??
@@ -86,16 +86,15 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
     {
         var jobId = document.Metadata[LlamaParseJobIdMetadataKey];
 
-        var jobResult = await GetJobResults(jobId, cancellationToken);
+        var job = new Job(client, document.Metadata, jobId.ToString(),  _endpoint, ResultType.Json, apiKey);
 
-        var metadata = new Dictionary<string, object>(document.Metadata);
-
-
-        throw new NotImplementedException();
-        yield return null;
+        await foreach (var image in job.GetImagesAsync(cancellationToken))
+        {
+            yield return image;
+        }
     }
 
-    private Task<object> GetJobResults(object jobId, CancellationToken cancellationToken)
+    private Task<object> GetJobResults(object jobId, ResultType resulType, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -184,9 +183,8 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         var jobCreationResult = JsonDocument.Parse(responseBody).RootElement;
 
         var id = jobCreationResult.GetProperty("id").GetString();
-        var status = jobCreationResult.GetProperty("status").GetString();
 
-        var job = new Job(client, fileInfo, documentMetadata, id!, status!, _endpoint, _configuration.ResultType, apiKey);
+        var job = new Job(client, documentMetadata, id!, _endpoint, _configuration.ResultType, apiKey);
 
         return job;
     }

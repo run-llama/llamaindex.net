@@ -3,6 +3,7 @@ using FluentAssertions;
 using LlamaIndex.Core.Schema;
 using System.Security.Principal;
 using System.Text;
+using SkiaSharp;
 
 namespace LlamaParse.Tests;
 
@@ -45,11 +46,11 @@ public class ClientTests
     }
 
     [SkipOnKeyNotFoundFact]
-    public async Task load_files()
+    public async Task can_load_pdf()
     {
         var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY")??string.Empty);
 
-        var fileInfo = new FileInfo(@"D:/Repos/public/llama_parse/tests/test_files/attention_is_all_you_need.pdf");
+        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
 
     
         var documents = new List<Document>();
@@ -59,6 +60,30 @@ public class ClientTests
         }
 
         documents.Should().NotBeEmpty();
+    }
+
+    [SkipOnKeyNotFoundFact]
+    public async Task can_load_pdf_with_images()
+    {
+        var configuration = new Configuration
+            (extractImages: true);
+        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, configuration: configuration);
+
+        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
+
+
+        var images = new List<SKImage>();
+        await foreach (var document in llamaParseClient.LoadDataAsync(fileInfo))
+        {
+            if (document is ImageDocument imageDocument)
+            {
+              
+                var imageObject = SKImage.FromEncodedData(Convert.FromBase64String( imageDocument.Image));
+                images.Add(imageObject);
+            }
+        }
+
+        images.Should().NotBeEmpty();
     }
 }
 
@@ -79,7 +104,9 @@ public class LoggingHandler : DelegatingHandler
             log.AppendLine(await request.Content.ReadAsStringAsync());
         }
         log.AppendLine();
+        File.WriteAllText(@"D:\log_request_message.txt", log.ToString());
 
+        log.Clear();
         HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
 
         log.AppendLine("Response:");
@@ -91,7 +118,7 @@ public class LoggingHandler : DelegatingHandler
         log.AppendLine();
 
         var message = log.ToString();
-        File.WriteAllText(@"D:\log_message.txt", message); 
+        File.WriteAllText(@"D:\log_reponse_message.txt", message); 
         return response;
     }
 }
