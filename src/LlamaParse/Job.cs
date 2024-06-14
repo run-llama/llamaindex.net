@@ -45,11 +45,15 @@ public partial class LlamaParse
 
         private Document CreateDocumentFromJsonResults(JsonElement results)
         {
+            var documentMetadata = new Dictionary<string, object>(_metadata);
+            PopulateMetadataFromJobResult(results, documentMetadata);
             throw new NotImplementedException();
         }
 
         private Document CreateDocumentFromTextResults(JsonElement results)
         {
+            var documentMetadata = new Dictionary<string, object>(_metadata);
+            PopulateMetadataFromJobResult(results, documentMetadata);
             throw new NotImplementedException();
         }
 
@@ -58,13 +62,22 @@ public partial class LlamaParse
             var resultKey = resultType.ToString().ToLowerInvariant();
             var jobResult = results.GetProperty(resultKey).GetString();
 
+            var documentMetadata = new Dictionary<string, object>(_metadata);
+            PopulateMetadataFromJobResult(results, documentMetadata);
+
+            var document = new Document(id: id, text: jobResult, metadata = documentMetadata);
+            return document;
+        }
+
+        private void PopulateMetadataFromJobResult(JsonElement results, IDictionary<string, object> documentMetadata)
+        {
             var jobMetadata = results.GetProperty("job_metadata").Deserialize<Dictionary<string, JsonElement>>();
 
             if (jobMetadata is not null)
             {
                 foreach (var o in jobMetadata)
                 {
-                    _metadata[o.Key] = o.Value.ValueKind switch
+                    documentMetadata[o.Key] = o.Value.ValueKind switch
                     {
                         JsonValueKind.String => o.Value.GetString()!,
                         JsonValueKind.Number => o.Value.GetDouble(),
@@ -74,9 +87,6 @@ public partial class LlamaParse
                     };
                 }
             }
-
-            var document = new Document(id: id, text: jobResult, metadata = _metadata);
-            return document;
         }
 
         private async Task WaitForJobToCompleteAsync(CancellationToken cancellationToken)
