@@ -19,7 +19,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
     private readonly Configuration _configuration = configuration ?? new Configuration();
 
-    private readonly LlamaParseClient client = new LlamaParseClient(client, apiKey, string.IsNullOrWhiteSpace(endpoint)
+    private readonly LlamaParseClient _client = new(client, apiKey, string.IsNullOrWhiteSpace(endpoint)
         ? "https://api.cloud.llamaindex.ai"
         : endpoint);
 
@@ -117,7 +117,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
     {
         var jobId = document.Metadata[LlamaParseJobIdMetadataKey];
 
-        var job = new Job(client, document.Metadata, jobId.ToString(), ResultType.Json);
+        var job = new Job(_client, document.Metadata, jobId.ToString(), ResultType.Json);
 
         await foreach (var image in job.GetImagesAsync(cancellationToken))
         {
@@ -145,9 +145,9 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         documentMetadata["file_path"] = fileInfoName;
 
 
-        var id = await client.CreateJob(fileInfo, _configuration, cancellationToken);
+        var id = await _client.CreateJob(fileInfo, _configuration, cancellationToken);
 
-        var job = new Job(client, documentMetadata, id, _configuration.ResultType);
+        var job = new Job(_client, documentMetadata, id, _configuration.ResultType);
 
         return job;
     }
