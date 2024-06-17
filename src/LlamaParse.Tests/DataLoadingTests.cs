@@ -12,7 +12,6 @@ public class DataLoadingTests
 
         var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
-
         var documents = new List<Document>();
         await foreach (var document in llamaParseClient.LoadDataAsync(fileInfo))
         {
@@ -29,7 +28,6 @@ public class DataLoadingTests
 
         var fileInfo = new FileInfo("./data/working_memory_update.pptx");
 
-
         var documents = new List<Document>();
         await foreach (var document in llamaParseClient.LoadDataAsync(fileInfo))
         {
@@ -45,7 +43,6 @@ public class DataLoadingTests
         var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
 
         var fileInfo = new FileInfo("./data/customers_100.xlsx");
-
 
         var documents = new List<Document>();
         await foreach (var document in llamaParseClient.LoadDataAsync(fileInfo))
