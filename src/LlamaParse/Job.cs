@@ -74,15 +74,9 @@ public partial class LlamaParse
             }
         }
 
-        public async IAsyncEnumerable<ImageDocument> GetImagesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+        public async IAsyncEnumerable<ImageDocument> GetImagesAsync( RawResult rawResult,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            await WaitForJobToCompleteAsync(cancellationToken);
-
-            if (resultType != ResultType.Json)
-            {
-                throw new InvalidOperationException("Images can only be extracted from JSON results.");
-            }
-            var rawResult = await client.GetJobResultAsync(id, resultType, cancellationToken);
             foreach (var pageElement in rawResult.Result.GetProperty("pages").EnumerateArray())
             {
                 var pageNumber = pageElement.GetProperty("page").GetInt32();
@@ -129,7 +123,21 @@ public partial class LlamaParse
                     yield return imageDocument;
                 }
             }
+        }
+        public async IAsyncEnumerable<ImageDocument> GetImagesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            await WaitForJobToCompleteAsync(cancellationToken);
+
+            if (resultType != ResultType.Json)
+            {
+                throw new InvalidOperationException("Images can only be extracted from JSON results.");
+            }
+            var rawResult = await client.GetJobResultAsync(id, resultType, cancellationToken);
            
+           await foreach (var imageDocument in GetImagesAsync(rawResult, cancellationToken))
+           {
+               yield return imageDocument;
+           }
         }
     }
 }
