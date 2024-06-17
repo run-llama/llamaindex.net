@@ -11,7 +11,6 @@ public class Configuration(
     string? pageSeparator = null,
     bool gpt4oMode = false,
     string? gpt4oApiKey = null,
-    bool splitByPage = false,
     bool extractImages = false,
     ResultType resultType = default)
 {
@@ -25,7 +24,6 @@ public class Configuration(
     public string? PageSeparator { get; } = pageSeparator;
     public bool Gpt4oMode { get; } = gpt4oMode;
     public string? Gpt4oApiKey { get; } = gpt4oApiKey;
-    public bool SplitByPage { get; } = splitByPage;
     public bool ExtractImages { get; } = extractImages;
     public ResultType ResultType { get; } = resultType;
 }

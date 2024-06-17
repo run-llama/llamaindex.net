@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -33,7 +34,7 @@ internal class LlamaParseClient(HttpClient client, string apiKey, string endpoin
         return (JobStatus)Enum.Parse(typeof(JobStatus), statusString!, true);
 
     }
-    public async Task<JsonElement> GetJobResultAsync(string jobId, ResultType resultType, CancellationToken cancellationToken)
+    public async Task<RawResult> GetJobResultAsync(string jobId, ResultType resultType, CancellationToken cancellationToken)
     {
         var getResultUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{jobId}/result/{resultType.ToString().ToLowerInvariant()}");
         var request = new HttpRequestMessage(HttpMethod.Get, getResultUri);
@@ -41,7 +42,9 @@ internal class LlamaParseClient(HttpClient client, string apiKey, string endpoin
         var response = await client.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
         var resultString = await response.Content.ReadAsStringAsync();
-        return JsonDocument.Parse(resultString).RootElement;
+
+        var jsonElement = JsonDocument.Parse(resultString).RootElement;
+        return new RawResult(jobId, jsonElement, null);
     }
 
     public async Task<string> CreateJob(FileInfo fileInfo, Configuration configuration, CancellationToken cancellationToken)

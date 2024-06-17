@@ -1,5 +1,8 @@
 ﻿<ProjectConfiguration>
   <Settings>
+    <AdditionalFilesToIncludeForProject>
+      <Value>data\**.*</Value>
+    </AdditionalFilesToIncludeForProject>
     <IgnoredTests>
       <NamedTestSelector>
         <TestName>LlamaParse.Tests.ClientTests.load_files</TestName>

@@ -2,7 +2,6 @@ using System.Runtime.CompilerServices;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
 using System.Text;
-using System.Text.Json;
 using SkiaSharp;
 
 namespace LlamaParse.Tests;
@@ -50,7 +49,7 @@ public class ClientTests
     {
         var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY")??string.Empty);
 
-        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
+        var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
     
         var documents = new List<Document>();
@@ -67,11 +66,11 @@ public class ClientTests
     {
         var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
 
-        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
+        var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
 
-        var documents = new List<JsonElement>();
-        await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo, ResultType.Markdown))
+        var documents = new List<RawResult>();
+        await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo,  resultType: ResultType.Markdown))
         {
             documents.Add(document);
         }
@@ -84,11 +83,11 @@ public class ClientTests
     {
         var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
 
-        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
+        var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
 
-        var documents = new List<JsonElement>();
-        await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo, ResultType.Text))
+        var documents = new List<RawResult>();
+        await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo, resultType: ResultType.Text))
         {
             documents.Add(document);
         }
@@ -101,10 +100,10 @@ public class ClientTests
     {
         var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
 
-        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
+        var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
 
-        var documents = new List<JsonElement>();
+        var documents = new List<RawResult>();
         await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo, ResultType.Json))
         {
             documents.Add(document);
@@ -120,7 +119,7 @@ public class ClientTests
             (extractImages: true);
         var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, configuration: configuration);
 
-        var fileInfo = new FileInfo(@"D:\llama-rag\pdfs\1-29-24_An-actuarys-guide-to-Julia.pdf");
+        var fileInfo = new FileInfo("./data/polyglot_tool.pdf");
 
 
         var images = new List<SKImage>();
@@ -129,7 +128,7 @@ public class ClientTests
             if (document is ImageDocument imageDocument)
             {
               
-                var imageObject = SKImage.FromEncodedData(Convert.FromBase64String( imageDocument.Image));
+                var imageObject = SKImage.FromEncodedData(Convert.FromBase64String( imageDocument.Image!));
                 images.Add(imageObject);
             }
         }
@@ -138,16 +137,9 @@ public class ClientTests
     }
 }
 
-public class LoggingHandler : DelegatingHandler
+internal class LoggingHandler(HttpMessageHandler innerHandler, [CallerMemberName] string name = "")
+    : DelegatingHandler(innerHandler)
 {
-    private readonly string _name;
-
-    public LoggingHandler(HttpMessageHandler innerHandler,[CallerMemberName] string name = "")
-        : base(innerHandler)
-    {
-        _name = name;
-    }
-
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var log = new StringBuilder();
@@ -158,7 +150,7 @@ public class LoggingHandler : DelegatingHandler
             log.AppendLine(await request.Content.ReadAsStringAsync(cancellationToken));
         }
         log.AppendLine();
-        await File.WriteAllTextAsync(@$"D:\log_request_message_{_name}.txt", log.ToString(), cancellationToken);
+        await File.WriteAllTextAsync(@$"D:\log_request_message_{name}.txt", log.ToString(), cancellationToken);
 
         log.Clear();
         var response = await base.SendAsync(request, cancellationToken);
@@ -172,7 +164,7 @@ public class LoggingHandler : DelegatingHandler
         log.AppendLine();
 
         var message = log.ToString();
-        await File.WriteAllTextAsync($@"D:\log_response_message_{_name}.txt", message, cancellationToken); 
+        await File.WriteAllTextAsync($@"D:\log_response_message_{name}.txt", message, cancellationToken); 
         return response;
     }
 }
