@@ -109,7 +109,7 @@ public partial class LlamaParseClient
 
                     using var activity = LlamaDiagnostics.StartGetImageActivity(rawResult.JobId, name!);
 
-                    var content = await client.GetImage(id, name!, cancellationToken);
+                    var content = await client.GetImageAsync(id, name!, cancellationToken);
 
                     var pageMetadata = new Dictionary<string, object>(_metadata)
                     {

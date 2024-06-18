@@ -135,24 +135,6 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
         return job;
     }
 
-    private Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object> metadata, CancellationToken cancellationToken)
-    {
-        if (!FileTypes.IsSupported(fileInfo))
-        {
-            throw new InvalidOperationException($"Unsupported file type: {fileInfo.Name}");
-        }
-
-        if (!fileInfo.Exists)
-        {
-            throw new FileNotFoundException($"File not found: {fileInfo.FullName}");
-        }
-
-        var data = File.ReadAllBytes(fileInfo.FullName);
-        var mimeType = FileTypes.GetMimeType(fileInfo.Name);
-        var inMemoryFile = new InMemoryFile(data, fileInfo.Name, mimeType);
-        return CreateJobAsync(inMemoryFile, metadata, cancellationToken);
-    }
-
     private async Task<Job> CreateJobAsync(InMemoryFile file, Dictionary<string, object> metadata, CancellationToken cancellationToken)
     {
         if (!FileTypes.IsSupported(file.FileName))
@@ -166,7 +148,7 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
 
         using var activity = LlamaDiagnostics.StartCreateJob(file.FileName);
 
-        var id = await _client.CreateJob(file.FileData, file.FileName, file.MimeType, Configuration, cancellationToken);
+        var id = await _client.CreateJobAsync(file.FileData, file.FileName, file.MimeType, Configuration, cancellationToken);
         LlamaDiagnostics.EndCreateJob(activity, "succeeded", id);
         return CreateJob(id, metadata, Configuration.ResultType);
     }
