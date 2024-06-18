@@ -40,20 +40,22 @@ internal class LlamaParseClient(HttpClient client, string apiKey, string endpoin
         var request = new HttpRequestMessage(HttpMethod.Get, getResultUri);
         request.Headers.Add("Authorization", $"Bearer {apiKey}");
         var response = await client.SendAsync(request, cancellationToken);
+
         response.EnsureSuccessStatusCode();
         var resultString = await response.Content.ReadAsStringAsync();
 
         var jsonElement = JsonDocument.Parse(resultString).RootElement;
         var jobMetaData = jsonElement.GetProperty(Constants.JobMetadataKey);
         return new RawResult(
-            jobId, 
+            jobId,
             jsonElement,
-            null, 
-            jobMetaData.GetProperty(Constants.CreditsUsedKey).GetDouble(), 
+            null,
+            jobMetaData.GetProperty(Constants.CreditsUsedKey).GetDouble(),
             jobMetaData.GetProperty(Constants.CreditsMaxKey).GetDouble(),
             jobMetaData.GetProperty(Constants.JobCreditsUsageKey).GetDouble(),
             jobMetaData.GetProperty(Constants.JobPagesKey).GetDouble(),
             jobMetaData.GetProperty(Constants.JobIsCacheHitKey).GetBoolean());
+
     }
 
     public async Task<string> CreateJob(FileInfo fileInfo, Configuration configuration, CancellationToken cancellationToken)

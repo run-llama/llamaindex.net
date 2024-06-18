@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +11,9 @@ using LlamaIndex.Core.Schema;
 
 
 namespace LlamaParse;
+
+public sealed class JobCancelledException(string message) : Exception(message);
+public sealed class JobFailedException(string message) : Exception(message);
 
 public partial class LlamaParse
 {
@@ -24,11 +30,28 @@ public partial class LlamaParse
 
         public async Task<RawResult> GetRawResult(ResultType type, CancellationToken cancellationToken)
         {
-            await WaitForJobToCompleteAsync(cancellationToken);
-            var rawResults =  await client.GetJobResultAsync(id, type, cancellationToken);
-            var documentMetadata = new Dictionary<string, object>(_metadata);
-            PopulateMetadataFromJobResult(rawResults.Result, documentMetadata);
-            return new RawResult(rawResults.JobId, rawResults.Result, documentMetadata, rawResults.CreditsUsed, rawResults.CreditsMax, rawResults.JobCreditsUsage, rawResults.JobPages, rawResults.IsCacheHit);
+            using var activity = LlamaDiagnostics.StartGetResultActivity(id, resultType);
+            try
+            {
+                await WaitForJobToCompleteAsync(cancellationToken);
+                var rawResults = await client.GetJobResultAsync(id, type, cancellationToken);
+                var documentMetadata = new Dictionary<string, object>(_metadata);
+                PopulateMetadataFromJobResult(rawResults.Result, documentMetadata);
+                LlamaDiagnostics.EndGetResultActivity(activity, reason: "succeeded", rawResults);
+
+                return new RawResult(rawResults.JobId, rawResults.Result, documentMetadata, rawResults.CreditsUsed,
+                    rawResults.CreditsMax, rawResults.JobCreditsUsage, rawResults.JobPages, rawResults.IsCacheHit);
+            }
+            catch(JobCancelledException)
+            {
+                LlamaDiagnostics.EndGetResultActivity(activity, reason: "cancelled");
+                throw;
+            }
+            catch (JobFailedException)
+            {
+                LlamaDiagnostics.EndGetResultActivity(activity, reason: "failed");
+                throw;
+            }
         }
 
         private static void PopulateMetadataFromJobResult(JsonElement results, IDictionary<string, object> documentMetadata)
@@ -68,13 +91,13 @@ public partial class LlamaParse
             switch (status)
             {
                 case JobStatus.Cancelled:
-                    throw new InvalidOperationException($"Job {id} was cancelled.");
+                    throw new JobCancelledException($"Job {id} was cancelled.");
                 case JobStatus.Error:
-                    throw new InvalidOperationException($"Job {id} failed.");
+                    throw new JobFailedException($"Job {id} failed.");
             }
         }
 
-        public async IAsyncEnumerable<ImageDocument> GetImagesAsync( RawResult rawResult,
+        private async IAsyncEnumerable<ImageDocument> GetImagesAsync( RawResult rawResult,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             foreach (var pageElement in rawResult.Result.GetProperty("pages").EnumerateArray())
@@ -95,7 +118,7 @@ public partial class LlamaParse
                         ["image_width"] = width
                     };
 
-                    var jobMetadata = rawResult.Result.GetProperty("job_metadata").Deserialize<Dictionary<string, JsonElement>>();
+                    var jobMetadata = rawResult.Result.GetProperty(Constants.JobMetadataKey).Deserialize<Dictionary<string, JsonElement>>();
 
                     if (jobMetadata is not null)
                     {

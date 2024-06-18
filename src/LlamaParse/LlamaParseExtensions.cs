@@ -48,6 +48,8 @@ public static class LlamaParseExtensions
 
                             break;
                         case ResultType.Json:
+                            yield return new Document(Guid.NewGuid().ToString(), page.GetRawText(),
+                                documentMetadata);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -56,6 +58,12 @@ public static class LlamaParseExtensions
             }
             else
             {
+                if (llamaParse.Configuration.ResultType == ResultType.Json)
+                {
+                    yield return new Document(jobId, result.GetRawText(), documentMetadata);
+
+                }
+
                 var content = new StringBuilder();
                 foreach (var page in result.GetProperty("pages").EnumerateArray())
                 {
@@ -73,8 +81,6 @@ public static class LlamaParseExtensions
                             {
                                 content.AppendLine(text.GetString());
                             }
-                            break;
-                        case ResultType.Json:
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();

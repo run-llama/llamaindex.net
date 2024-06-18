@@ -6,7 +6,7 @@ namespace LlamaParse.Tests;
 public class DataLoadingTests
 {
     [SkipOnKeyNotFoundFact]
-    public async Task can_load_pdf_pdf()
+    public async Task can_load_pdf_file()
     {
         var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
 
