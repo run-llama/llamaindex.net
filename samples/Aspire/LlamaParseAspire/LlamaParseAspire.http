@@ -1,0 +1,6 @@
+@LlamaParseAspire_HostAddress = http://localhost:5064
+
+GET {{LlamaParseAspire_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
