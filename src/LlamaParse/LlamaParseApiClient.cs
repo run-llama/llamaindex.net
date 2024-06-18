@@ -123,14 +123,4 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
         var id = jobCreationResult.GetProperty("id").GetString();
         return id!;
     }
-
-    public Task<string> CreateJob(FileInfo fileInfo, Configuration configuration, CancellationToken cancellationToken)
-    {
-        var mimeType = FileTypes.GetMimeType(fileInfo.FullName);
-
-        var inMemoryFile = new InMemoryFile(File.ReadAllBytes(fileInfo.FullName), fileInfo.Name, mimeType);
-
-        return CreateJob(inMemoryFile.FileData, inMemoryFile.FileName, inMemoryFile.MimeType, configuration,
-            cancellationToken);
-    }
 }
