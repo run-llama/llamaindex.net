@@ -167,7 +167,7 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
         
         using var activity = LlamaDiagnostics.StartCreateJob(file.FileName);
        
-        var id = await _client.CreateJob(file.Stream, file.FileName, file.MimeType, Configuration, cancellationToken);
+        var id = await _client.CreateJob(file.FileData, file.FileName, file.MimeType, Configuration, cancellationToken);
         LlamaDiagnostics.EndCreateJob(activity, "succeeded", id);
         return CreateJob(id, metadata, Configuration.ResultType);
     }

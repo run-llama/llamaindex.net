@@ -60,7 +60,7 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
 
     }
 
-    public async Task<string> CreateJob(Memory<byte> data, string fileName , string mimeType, Configuration configuration, CancellationToken cancellationToken)
+    public async Task<string> CreateJob(ReadOnlyMemory<byte> data, string fileName , string mimeType, Configuration configuration, CancellationToken cancellationToken)
     {
         // upload file and create a job
         var uploadUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/upload");
@@ -73,7 +73,7 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
         }
 
         //  Set up the file content
-        var fileContent = new StreamContent(new MemoryStream(data.ToArray()));
+        var fileContent = new ByteArrayContent(data.ToArray());
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
 
         fileContent.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(
@@ -139,6 +139,6 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
 
         var inMemoryFile = new InMemoryFile(File.ReadAllBytes(fileInfo.FullName), fileInfo.Name, mimeType);
 
-        return CreateJob(inMemoryFile.Stream, inMemoryFile.FileName, inMemoryFile.MimeType , configuration, cancellationToken);
+        return CreateJob(inMemoryFile.FileData, inMemoryFile.FileName, inMemoryFile.MimeType , configuration, cancellationToken);
     }
 }

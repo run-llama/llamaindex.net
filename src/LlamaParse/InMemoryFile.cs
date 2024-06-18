@@ -2,9 +2,9 @@
 
 namespace LlamaParse;
 
-public class InMemoryFile(Memory<byte> stream, string fileName, string? mimeType = null)
+public class InMemoryFile(ReadOnlyMemory<byte> fileData, string fileName, string? mimeType = null)
 {
-    public Memory<byte> Stream { get; } = stream;
+    public ReadOnlyMemory<byte> FileData { get; } = fileData;
     public string FileName { get; } = fileName;
     public string MimeType { get; } = string.IsNullOrWhiteSpace(mimeType) ? FileTypes.GetMimeType(fileName) : mimeType!;
 }
