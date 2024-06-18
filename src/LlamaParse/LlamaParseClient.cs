@@ -1,13 +1,12 @@
-﻿using System;
+﻿using LlamaIndex.Core.Schema;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-
-using LlamaIndex.Core.Schema;
 
 namespace LlamaParse;
 
@@ -52,8 +51,8 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
             }
 
             var documentMetadata = metadata ?? new Dictionary<string, object>();
-           
-            var job = await CreateJobAsync(file , documentMetadata, cancellationToken);
+
+            var job = await CreateJobAsync(file, documentMetadata, cancellationToken);
             jobs.Add(job);
         }
 
@@ -69,7 +68,7 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
     public async IAsyncEnumerable<RawResult> LoadDataRawAsync(
         IEnumerable<FileInfo> files,
         ResultType? resultType = null,
-        Dictionary<string, object>? metadata = null, 
+        Dictionary<string, object>? metadata = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var jobs = new List<Job>();
@@ -98,7 +97,7 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
 
         foreach (var job in jobs)
         {
-            var result = await job.GetRawResult(resultType?? Configuration.ResultType, cancellationToken);
+            var result = await job.GetRawResult(resultType ?? Configuration.ResultType, cancellationToken);
             yield return result;
         }
     }
@@ -106,7 +105,7 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
     public IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, CancellationToken cancellationToken = default)
     {
         var jobId = document.Metadata[Constants.JobIdKey];
-        
+
         return LoadImagesAsync(jobId.ToString(), document.Metadata, cancellationToken);
     }
 
@@ -117,11 +116,11 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
         return LoadImagesAsync(jobId, rawResult.Metadata, cancellationToken);
     }
 
-    public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(string jobId, Dictionary<string, object>? documentMetadata = null ,[EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(string jobId, Dictionary<string, object>? documentMetadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var metadata = documentMetadata?? new Dictionary<string, object>();
+        var metadata = documentMetadata ?? new Dictionary<string, object>();
 
-        var job =  CreateJob(jobId, metadata, ResultType.Json);
+        var job = CreateJob(jobId, metadata, ResultType.Json);
 
         await foreach (var image in job.GetImagesAsync(cancellationToken))
         {
@@ -132,11 +131,11 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
     private Job CreateJob(string jobId, Dictionary<string, object> metadata, ResultType? resultType = null)
     {
         var documentMetadata = metadata;
-        var job = new Job(_client, documentMetadata, jobId, resultType?? Configuration.ResultType);
+        var job = new Job(_client, documentMetadata, jobId, resultType ?? Configuration.ResultType);
         return job;
     }
 
-    private  Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object> metadata, CancellationToken cancellationToken)
+    private Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object> metadata, CancellationToken cancellationToken)
     {
         if (!FileTypes.IsSupported(fileInfo))
         {
@@ -154,7 +153,7 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
         return CreateJobAsync(inMemoryFile, metadata, cancellationToken);
     }
 
-    private async Task<Job> CreateJobAsync(InMemoryFile file,  Dictionary<string, object> metadata, CancellationToken cancellationToken)
+    private async Task<Job> CreateJobAsync(InMemoryFile file, Dictionary<string, object> metadata, CancellationToken cancellationToken)
     {
         if (!FileTypes.IsSupported(file.FileName))
         {
@@ -164,9 +163,9 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
         // clone metadata
         var documentMetadata = metadata;
         documentMetadata["file_path"] = file.FileName;
-        
+
         using var activity = LlamaDiagnostics.StartCreateJob(file.FileName);
-       
+
         var id = await _client.CreateJob(file.FileData, file.FileName, file.MimeType, Configuration, cancellationToken);
         LlamaDiagnostics.EndCreateJob(activity, "succeeded", id);
         return CreateJob(id, metadata, Configuration.ResultType);

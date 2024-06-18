@@ -1,12 +1,11 @@
-﻿using System;
+﻿using LlamaIndex.Core.Schema;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using LlamaIndex.Core.Schema;
-
-using static System.Net.WebRequestMethods;
 
 namespace LlamaParse;
 
@@ -25,8 +24,8 @@ public static class LlamaParseExtensions
 
     public static async IAsyncEnumerable<Document> LoadDataAsync(
         this LlamaParseClient llamaParseClient,
-        IEnumerable<InMemoryFile> inMemoryFiles, 
-        bool splitByPage = false, 
+        IEnumerable<InMemoryFile> inMemoryFiles,
+        bool splitByPage = false,
         Dictionary<string, object>? metadata = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -42,7 +41,7 @@ public static class LlamaParseExtensions
 
     }
 
-    public static  async IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient,IEnumerable<FileInfo> files, bool splitByPage = false, Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public static async IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, IEnumerable<FileInfo> files, bool splitByPage = false, Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var documentMetadata = metadata ?? new Dictionary<string, object>();
 

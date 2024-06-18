@@ -9,7 +9,7 @@ internal static class LlamaDiagnostics
     private static readonly string Namespace = typeof(LlamaDiagnostics).Namespace!;
     private static readonly ActivitySource s_activitySource = new(Namespace);
 
-    private static  string EnableDiagnosticsSwitch => $"{Namespace}.EnableOTelDiagnostics";
+    private static string EnableDiagnosticsSwitch => $"{Namespace}.EnableOTelDiagnostics";
     private static string EnableSensitiveEventsSwitch => $"{Namespace}.EnableOTelDiagnosticsSensitive";
 
     private const string EnableDiagnosticsEnvVar = "LLAMAPARSE_ENABLE_OTEL_DIAGNOSTICS";
@@ -90,7 +90,7 @@ internal static class LlamaDiagnostics
             "llamaparse.get_image",
             [
                 new("job_id", jobId),
-               
+
             ]);
         if (EnableSensitiveEvents)
         {
@@ -140,7 +140,7 @@ internal static class LlamaDiagnostics
             activity!.EnrichWithTags(
             [
                 new("file_path", fileInfo.Name),
-              
+
             ]);
         }
 
@@ -167,7 +167,7 @@ internal static class LlamaDiagnostics
             activity!.EnrichWithTags(
             [
                 new("file_path", filename),
-              
+
             ]);
         }
 

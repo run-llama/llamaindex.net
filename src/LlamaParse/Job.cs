@@ -1,13 +1,11 @@
-﻿using System;
+﻿using LlamaIndex.Core.Schema;
+
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using LlamaIndex.Core.Schema;
 
 
 namespace LlamaParse;
@@ -17,11 +15,11 @@ public sealed class JobFailedException(string message) : Exception(message);
 
 public partial class LlamaParseClient
 {
-   private class Job(
-        LlamaParseApiClient client,
-        Dictionary<string, object> metadata,
-        string id,
-        ResultType resultType)
+    private class Job(
+         LlamaParseApiClient client,
+         Dictionary<string, object> metadata,
+         string id,
+         ResultType resultType)
     {
         private readonly Dictionary<string, object> _metadata = new(metadata)
         {
@@ -42,7 +40,7 @@ public partial class LlamaParseClient
                 return new RawResult(rawResults.JobId, rawResults.Result, documentMetadata, rawResults.CreditsUsed,
                     rawResults.CreditsMax, rawResults.JobCreditsUsage, rawResults.JobPages, rawResults.IsCacheHit);
             }
-            catch(JobCancelledException)
+            catch (JobCancelledException)
             {
                 LlamaDiagnostics.EndGetResultActivity(activity, reason: "cancelled");
                 throw;
@@ -83,7 +81,7 @@ public partial class LlamaParseClient
                 {
                     throw new TaskCanceledException();
                 }
-                
+
                 await Task.Delay(500, cancellationToken);
                 status = await client.GetJobStatusAsync(id, cancellationToken);
             }
@@ -97,7 +95,7 @@ public partial class LlamaParseClient
             }
         }
 
-        private async IAsyncEnumerable<ImageDocument> GetImagesAsync( RawResult rawResult,
+        private async IAsyncEnumerable<ImageDocument> GetImagesAsync(RawResult rawResult,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             foreach (var pageElement in rawResult.Result.GetProperty("pages").EnumerateArray())
@@ -108,7 +106,7 @@ public partial class LlamaParseClient
                     var name = imageElement.GetProperty("name").GetString();
                     var width = imageElement.GetProperty("width").GetInt32();
                     var height = imageElement.GetProperty("height").GetInt32();
-                    
+
                     using var activity = LlamaDiagnostics.StartGetImageActivity(rawResult.JobId, name!);
 
                     var content = await client.GetImage(id, name!, cancellationToken);
@@ -154,7 +152,7 @@ public partial class LlamaParseClient
         }
         public async IAsyncEnumerable<ImageDocument> GetImagesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
         {
- 
+
             await WaitForJobToCompleteAsync(cancellationToken);
 
             if (resultType != ResultType.Json)
@@ -162,11 +160,11 @@ public partial class LlamaParseClient
                 throw new InvalidOperationException("Images can only be extracted from JSON results.");
             }
             var rawResult = await client.GetJobResultAsync(id, resultType, cancellationToken);
-           
-           await foreach (var imageDocument in GetImagesAsync(rawResult, cancellationToken))
-           {
-               yield return imageDocument;
-           }
+
+            await foreach (var imageDocument in GetImagesAsync(rawResult, cancellationToken))
+            {
+                yield return imageDocument;
+            }
         }
     }
 }
