@@ -23,6 +23,7 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
         var node = nodeType switch
         {
             "TextNode" => DeserializeTextNode(nodeContent),
+            "ImageNode" => DeserializeImageNode(nodeContent),
             _ => throw new NotSupportedException($"Node type {nodeType} is not supported")
         };
 
@@ -74,6 +75,8 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
         return node;
     }
 
+
+
     private RelatedNodeInfo CreateRelateNodeInfo( JsonElement relationships)
     {
         var nodeId = GetStringPropertyValue("node_id", relationships);
@@ -101,12 +104,25 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
         var id = root.GetProperty("id_").GetString();
         var metadata = root.GetProperty("metadata").Deserialize<Dictionary<string, object>>();
         var text = root.GetProperty("text").GetString();
-        int? startCharIndex = GetIntPropertyValue("start_char_idx", root);
-        int? endCharIdx = GetIntPropertyValue("end_char_idx", root);
-
-
+        var startCharIndex = GetIntPropertyValue("start_char_idx", root);
+        var endCharIdx = GetIntPropertyValue("end_char_idx", root);
 
         return new TextNode(id!, text:text, endCharIdx: endCharIdx, startCharIndex: startCharIndex, metadata: metadata);
+    }
+
+    private BaseNode DeserializeImageNode(JsonDocument nodeContent)
+    {
+        var root = nodeContent.RootElement;
+        var id = root.GetProperty("id_").GetString();
+        var metadata = root.GetProperty("metadata").Deserialize<Dictionary<string, object>>();
+        var text = GetStringPropertyValue("text", root);
+
+        var image = GetStringPropertyValue("image", root);
+        var imagePath = GetStringPropertyValue("image_path", root);
+        var imageUrl = GetStringPropertyValue("image_url", root);
+        var imageMimetype = GetStringPropertyValue("image_mimetype", root);
+
+        return new ImageNode(id!, text: text, image:image, imageMimetype: imageMimetype, imageUrl:imageUrl, imagePath:imagePath, metadata: metadata);
     }
 
     private static int? GetIntPropertyValue(string propertyName, JsonElement root)

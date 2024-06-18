@@ -20,6 +20,7 @@ public class TextNode(
 [JsonConverter(typeof(BaseNodeConverter))]
 public class ImageNode(
     string id,
+    string? text = null,
     string? image = null,
     string? imagePath = null,
     string? imageUrl = null,
@@ -27,6 +28,7 @@ public class ImageNode(
     Dictionary<string, object>? metadata = null)
     : BaseNode(id, metadata)
 {
+    public string? Text { get; } = text;
     public string? Image { get; } = image;
     public string? ImagePath { get; } = imagePath;
     public string? ImageUrl { get; } = imageUrl;
