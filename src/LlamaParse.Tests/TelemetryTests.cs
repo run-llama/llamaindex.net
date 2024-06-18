@@ -10,7 +10,7 @@ public class TelemetryTests
     [SkipOnKeyNotFoundFact]
     public async Task produces_telemetry_on_loading()
     {
-        AppContext.SetSwitch("LlamaParseClient.EnableOTelDiagnostics", true);
+        AppContext.SetSwitch("LlamaParse.EnableOTelDiagnostics", true);
 
         var activities = new Dictionary<string, Activity>();
 

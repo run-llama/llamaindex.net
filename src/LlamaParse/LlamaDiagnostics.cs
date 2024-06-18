@@ -9,8 +9,9 @@ internal static class LlamaDiagnostics
     private static readonly string Namespace = typeof(LlamaDiagnostics).Namespace!;
     private static readonly ActivitySource s_activitySource = new(Namespace);
 
-    private const string EnableDiagnosticsSwitch = "LlamaParse.EnableOTelDiagnostics";
-    private const string EnableSensitiveEventsSwitch = "LlamaParse.EnableOTelDiagnosticsSensitive";
+    private static  string EnableDiagnosticsSwitch => $"{Namespace}.EnableOTelDiagnostics";
+    private static string EnableSensitiveEventsSwitch => $"{Namespace}.EnableOTelDiagnosticsSensitive";
+
     private const string EnableDiagnosticsEnvVar = "LLAMAPARSE_ENABLE_OTEL_DIAGNOSTICS";
     private const string EnableSensitiveEventsEnvVar = "LLAMAPARSE_ENABLE_OTEL_DIAGNOSTICS_SENSITIVE";
 
