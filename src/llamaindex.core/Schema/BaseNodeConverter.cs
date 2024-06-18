@@ -70,13 +70,9 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
 
             }
         }
-
-
         return node;
     }
-
-
-
+    
     private RelatedNodeInfo CreateRelateNodeInfo( JsonElement relationships)
     {
         var nodeId = GetStringPropertyValue("node_id", relationships);
