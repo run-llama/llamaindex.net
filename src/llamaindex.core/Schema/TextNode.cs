@@ -6,11 +6,11 @@ namespace LlamaIndex.Core.Schema;
 [JsonConverter(typeof(BaseNodeConverter))]
 public class TextNode(
     string id,
-    string? text = null, 
+    string? text = null,
     int? startCharIndex = null,
     int? endCharIdx = null,
-    Dictionary<string, object>? metadata = null) : 
-    BaseNode(id, metadata:metadata)
+    Dictionary<string, object>? metadata = null) :
+    BaseNode(id, metadata: metadata)
 {
     public string? Text { get; } = text;
     public int? StartCharIndex { get; } = startCharIndex;

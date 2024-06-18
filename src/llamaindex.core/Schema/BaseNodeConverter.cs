@@ -72,8 +72,8 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
         }
         return node;
     }
-    
-    private RelatedNodeInfo CreateRelateNodeInfo( JsonElement relationships)
+
+    private RelatedNodeInfo CreateRelateNodeInfo(JsonElement relationships)
     {
         var nodeId = GetStringPropertyValue("node_id", relationships);
         var nodeTypeString = GetStringPropertyValue("node_type", relationships);
@@ -88,9 +88,9 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
         }
         if (string.IsNullOrWhiteSpace(nodeTypeString))
         {
-           throw new InvalidOperationException("Node Type is required");
+            throw new InvalidOperationException("Node Type is required");
         }
-        var  nodeType = (NodeType)Convert.ToInt32(nodeTypeString);
+        var nodeType = (NodeType)Convert.ToInt32(nodeTypeString);
         return new RelatedNodeInfo(nodeId!, nodeType, metadata);
     }
 
@@ -103,7 +103,7 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
         var startCharIndex = GetIntPropertyValue("start_char_idx", root);
         var endCharIdx = GetIntPropertyValue("end_char_idx", root);
 
-        return new TextNode(id!, text:text, endCharIdx: endCharIdx, startCharIndex: startCharIndex, metadata: metadata);
+        return new TextNode(id!, text: text, endCharIdx: endCharIdx, startCharIndex: startCharIndex, metadata: metadata);
     }
 
     private BaseNode DeserializeImageNode(JsonDocument nodeContent)
@@ -118,7 +118,7 @@ public class BaseNodeConverter : JsonConverter<BaseNode>
         var imageUrl = GetStringPropertyValue("image_url", root);
         var imageMimetype = GetStringPropertyValue("image_mimetype", root);
 
-        return new ImageNode(id!, text: text, image:image, imageMimetype: imageMimetype, imageUrl:imageUrl, imagePath:imagePath, metadata: metadata);
+        return new ImageNode(id!, text: text, image: image, imageMimetype: imageMimetype, imageUrl: imageUrl, imagePath: imagePath, metadata: metadata);
     }
 
     private static int? GetIntPropertyValue(string propertyName, JsonElement root)

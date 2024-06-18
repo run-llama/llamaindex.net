@@ -38,4 +38,4 @@ public static class RelationshipTypeExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(relationshipType), relationshipType, null)
         };
     }
-}   
+}
