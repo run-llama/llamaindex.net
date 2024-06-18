@@ -108,6 +108,9 @@ public partial class LlamaParse
                     var name = imageElement.GetProperty("name").GetString();
                     var width = imageElement.GetProperty("width").GetInt32();
                     var height = imageElement.GetProperty("height").GetInt32();
+                    
+                    using var activity = LlamaDiagnostics.StartGetImageActivity(rawResult.JobId, name!);
+
                     var content = await client.GetImage(id, name!, cancellationToken);
 
                     var pageMetadata = new Dictionary<string, object>(_metadata)
@@ -143,12 +146,15 @@ public partial class LlamaParse
                         metadata: pageMetadata
                     );
 
+                    LlamaDiagnostics.EndGetImageActivity(activity, reason: "succeeded");
+
                     yield return imageDocument;
                 }
             }
         }
         public async IAsyncEnumerable<ImageDocument> GetImagesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
         {
+ 
             await WaitForJobToCompleteAsync(cancellationToken);
 
             if (resultType != ResultType.Json)

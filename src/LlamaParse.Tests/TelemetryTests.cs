@@ -37,9 +37,11 @@ public class TelemetryTests
 
         ActivitySource.AddActivityListener(listener);
 
-        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
+        var config = new Configuration(extractImages: true);
+        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty,
+            configuration:config);
 
-        var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
+        var fileInfo = new FileInfo("./data/polyglot_tool.pdf");
 
         var documents = new List<Document>();
         await foreach (var document in llamaParseClient.LoadDataAsync(fileInfo))

@@ -102,6 +102,8 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
         var documentMetadata = metadata;
         documentMetadata["file_path"] = fileInfoName;
   
+        using var activity = LlamaDiagnostics.StartCreateJob(fileInfo);
         var id = await _client.CreateJob(fileInfo, Configuration, cancellationToken);
+        LlamaDiagnostics.EndCreateJob(activity, "succeeded", id);
         return CreateJob(id, metadata, Configuration.ResultType); }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 namespace LlamaParse;
 
@@ -14,9 +15,9 @@ internal static class LlamaDiagnostics
     private const string EnableDiagnosticsEnvVar = "LLAMAPARSE_ENABLE_OTEL_DIAGNOSTICS";
     private const string EnableSensitiveEventsEnvVar = "LLAMAPARSE_ENABLE_OTEL_DIAGNOSTICS_SENSITIVE";
 
-    private static  bool EnableDiagnostics => AppContextSwitchHelper.GetConfigValue(EnableDiagnosticsSwitch, EnableDiagnosticsEnvVar);
+    private static bool EnableDiagnostics => AppContextSwitchHelper.GetConfigValue(EnableDiagnosticsSwitch, EnableDiagnosticsEnvVar);
 
-    private static  bool EnableSensitiveEvents => AppContextSwitchHelper.GetConfigValue(EnableSensitiveEventsSwitch, EnableSensitiveEventsEnvVar);
+    private static bool EnableSensitiveEvents => AppContextSwitchHelper.GetConfigValue(EnableSensitiveEventsSwitch, EnableSensitiveEventsEnvVar);
 
     /// <summary>
     /// Check if diagnostics is enabled
@@ -44,8 +45,7 @@ internal static class LlamaDiagnostics
             "llamaparse.get_result",
             [
                 new("job_id", jobId),
-                new ("result_type", resultType),
-                new ("start_time", DateTime.UtcNow)
+                new ("result_type", resultType)
             ]);
 
 
@@ -56,7 +56,7 @@ internal static class LlamaDiagnostics
     {
         if (!IsDiagnosticsEnabled())
         {
-            return ;
+            return;
         }
 
         if (activity is { })
@@ -64,12 +64,11 @@ internal static class LlamaDiagnostics
             activity = activity.EnrichWithTags(
             [
                 new("reason", reason),
-                new ("end_time", DateTime.UtcNow)
 
             ]);
             if (rawResults is { })
             {
-                activity= activity.EnrichWithTags(
+                activity.EnrichWithTags(
                 [
                     new (Constants.JobIsCacheHitKey, rawResults.IsCacheHit),
                     new (Constants.JobPagesKey, rawResults.JobPages),
@@ -77,6 +76,93 @@ internal static class LlamaDiagnostics
 
                 ]);
             }
+        }
+    }
+
+    public static Activity? StartGetImageActivity(string jobId, string imageName)
+    {
+        if (!IsDiagnosticsEnabled())
+        {
+            return null;
+        }
+
+        var activity = s_activitySource.StartActivityWithTags(
+            "llamaparse.get_image",
+            [
+                new("job_id", jobId),
+               
+            ]);
+        if (EnableSensitiveEvents)
+        {
+            activity!.EnrichWithTags(
+            [
+                new("image_name", imageName),
+
+            ]);
+        }
+
+        return activity;
+    }
+
+    public static void EndGetImageActivity(Activity? activity, string reason)
+    {
+        if (!IsDiagnosticsEnabled())
+        {
+            return;
+        }
+
+        if (activity is { })
+        {
+            activity.EnrichWithTags(
+             [
+                 new("reason", reason),
+
+            ]);
+
+        }
+    }
+
+    public static Activity? StartCreateJob(FileInfo fileInfo)
+    {
+        if (!IsDiagnosticsEnabled())
+        {
+            return null;
+        }
+
+        var activity = s_activitySource.StartActivityWithTags(
+            "llamaparse.create_job",
+            [
+                new("file_extension", fileInfo.Extension),
+
+            ]);
+        if (EnableSensitiveEvents)
+        {
+            activity!.EnrichWithTags(
+            [
+                new("file_path", fileInfo.Name),
+              
+            ]);
+        }
+
+        return activity;
+    }
+
+    public static void EndCreateJob(Activity? activity, string reason, string jobId)
+    {
+        if (!IsDiagnosticsEnabled())
+        {
+            return;
+        }
+
+        if (activity is { })
+        {
+            activity.EnrichWithTags(
+            [
+                new("reason", reason),
+                new("job_id", jobId),
+
+            ]);
+
         }
     }
 }
