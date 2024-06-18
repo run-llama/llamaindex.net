@@ -147,6 +147,33 @@ internal static class LlamaDiagnostics
         return activity;
     }
 
+    public static Activity? StartCreateJob(string filename)
+    {
+        if (!IsDiagnosticsEnabled())
+        {
+            return null;
+        }
+
+        var extension = Path.GetExtension(filename);
+
+        var activity = s_activitySource.StartActivityWithTags(
+            "llamaparse.create_job",
+            [
+                new("file_extension", extension),
+
+            ]);
+        if (EnableSensitiveEvents)
+        {
+            activity!.EnrichWithTags(
+            [
+                new("file_path", filename),
+              
+            ]);
+        }
+
+        return activity;
+    }
+
     public static void EndCreateJob(Activity? activity, string reason, string jobId)
     {
         if (!IsDiagnosticsEnabled())

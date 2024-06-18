@@ -60,15 +60,20 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
 
     }
 
-    public async Task<string> CreateJob(Stream fileStream, string fileName , string mimeType, Configuration configuration, CancellationToken cancellationToken)
+    public async Task<string> CreateJob(Memory<byte> data, string fileName , string mimeType, Configuration configuration, CancellationToken cancellationToken)
     {
         // upload file and create a job
         var uploadUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/upload");
 
         var form = new MultipartFormDataContent();
 
+        if (string.IsNullOrWhiteSpace(mimeType))
+        {
+            mimeType = FileTypes.GetMimeType(fileName);
+        }
+
         //  Set up the file content
-        var fileContent = new StreamContent(fileStream);
+        var fileContent = new StreamContent(new MemoryStream(data.ToArray()));
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
 
         fileContent.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(
@@ -130,10 +135,10 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
 
     public Task<string> CreateJob(FileInfo fileInfo, Configuration configuration, CancellationToken cancellationToken)
     {
-        var mimeType = FileTypes.GetMimeType(fileInfo);
-    
-        var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
+        var mimeType = FileTypes.GetMimeType(fileInfo.FullName);
 
-        return CreateJob(fileStream, fileInfo.Name, mimeType, configuration, cancellationToken);
+        var inMemoryFile = new InMemoryFile(File.ReadAllBytes(fileInfo.FullName), fileInfo.Name, mimeType);
+
+        return CreateJob(inMemoryFile.Stream, inMemoryFile.FileName, inMemoryFile.MimeType , configuration, cancellationToken);
     }
 }

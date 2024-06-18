@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,17 +20,31 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
         : endpoint!);
 
 
-    public IAsyncEnumerable<RawResult> LoadDataRawAsync(FileInfo file, ResultType? resultType = null, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<RawResult> LoadDataRawAsync(FileInfo fileInfo, ResultType? resultType = null, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
-        return LoadDataRawAsync([file], resultType, metadata, cancellationToken);
+        if (!fileInfo.Exists)
+        {
+            throw new FileNotFoundException($"File {fileInfo.FullName} not found");
+        }
+        var inMemoryFile =
+            new InMemoryFile(File.ReadAllBytes(fileInfo.FullName), fileInfo.Name, FileTypes.GetMimeType(fileInfo.Name));
+        return LoadDataRawAsync(inMemoryFile, resultType, metadata, cancellationToken);
     }
 
-    public async IAsyncEnumerable<RawResult> LoadDataRawAsync(IEnumerable<FileInfo> files,
+    public IAsyncEnumerable<RawResult> LoadDataRawAsync(InMemoryFile inMemoryFile, ResultType? resultType = null, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+    {
+
+        return LoadDataRawAsync([inMemoryFile], resultType, metadata, cancellationToken);
+    }
+
+    public async IAsyncEnumerable<RawResult> LoadDataRawAsync(
+        IEnumerable<InMemoryFile> files,
         ResultType? resultType = null,
-        Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        Dictionary<string, object>? metadata = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var jobs = new List<Job>();
-        foreach (var fileInfo in files)
+        foreach (var file in files)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -37,8 +52,45 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
             }
 
             var documentMetadata = metadata ?? new Dictionary<string, object>();
+           
+            var job = await CreateJobAsync(file , documentMetadata, cancellationToken);
+            jobs.Add(job);
+        }
 
-            var job = await CreateJobAsync(fileInfo, documentMetadata, cancellationToken);
+        if (cancellationToken.IsCancellationRequested) yield break;
+
+        foreach (var job in jobs)
+        {
+            var result = await job.GetRawResult(resultType ?? Configuration.ResultType, cancellationToken);
+            yield return result;
+        }
+
+    }
+    public async IAsyncEnumerable<RawResult> LoadDataRawAsync(
+        IEnumerable<FileInfo> files,
+        ResultType? resultType = null,
+        Dictionary<string, object>? metadata = null, 
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var jobs = new List<Job>();
+        foreach (var fileInfo in files)
+        {
+            if (!fileInfo.Exists)
+            {
+                throw new FileNotFoundException($"File {fileInfo.FullName} not found");
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                yield break;
+            }
+
+            var documentMetadata = metadata ?? new Dictionary<string, object>();
+
+            var inMemoryFile =
+                new InMemoryFile(File.ReadAllBytes(fileInfo.FullName), fileInfo.Name, FileTypes.GetMimeType(fileInfo.Name));
+
+            var job = await CreateJobAsync(inMemoryFile, documentMetadata, cancellationToken);
             jobs.Add(job);
         }
 
@@ -84,10 +136,8 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
         return job;
     }
 
-    private async Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object> metadata, CancellationToken cancellationToken)
+    private  Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object> metadata, CancellationToken cancellationToken)
     {
-        var fileInfoName = fileInfo.Name;
-
         if (!FileTypes.IsSupported(fileInfo))
         {
             throw new InvalidOperationException($"Unsupported file type: {fileInfo.Name}");
@@ -98,12 +148,27 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
             throw new FileNotFoundException($"File not found: {fileInfo.FullName}");
         }
 
+        var data = File.ReadAllBytes(fileInfo.FullName);
+        var mimeType = FileTypes.GetMimeType(fileInfo.Name);
+        var inMemoryFile = new InMemoryFile(data, fileInfo.Name, mimeType);
+        return CreateJobAsync(inMemoryFile, metadata, cancellationToken);
+    }
+
+    private async Task<Job> CreateJobAsync(InMemoryFile file,  Dictionary<string, object> metadata, CancellationToken cancellationToken)
+    {
+        if (!FileTypes.IsSupported(file.FileName))
+        {
+            throw new InvalidOperationException($"Unsupported file type: {file.FileName}");
+        }
+
         // clone metadata
         var documentMetadata = metadata;
-        documentMetadata["file_path"] = fileInfoName;
-  
-        using var activity = LlamaDiagnostics.StartCreateJob(fileInfo);
-        var id = await _client.CreateJob(fileInfo, Configuration, cancellationToken);
+        documentMetadata["file_path"] = file.FileName;
+        
+        using var activity = LlamaDiagnostics.StartCreateJob(file.FileName);
+       
+        var id = await _client.CreateJob(file.Stream, file.FileName, file.MimeType, Configuration, cancellationToken);
         LlamaDiagnostics.EndCreateJob(activity, "succeeded", id);
-        return CreateJob(id, metadata, Configuration.ResultType); }
+        return CreateJob(id, metadata, Configuration.ResultType);
+    }
 }

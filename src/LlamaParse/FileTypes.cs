@@ -108,17 +108,19 @@ internal static class FileTypes
         return IsSupported(extension);
     }
 
-    public static bool IsSupported(string extension) => _supportedFileTypes.Contains(extension);
-
-    public static string GetMimeType(FileInfo fileInfo)
+    public static bool IsSupported(string fileName)
     {
-        var fileInfoName = fileInfo.Name;
+        var extension = Path.GetExtension(fileName);
+        return _supportedFileTypes.Contains(extension);
+    }
 
-        var extension = Path.GetExtension(fileInfoName);
+    public static string GetMimeType(string fileName)
+    {
+        var extension = Path.GetExtension(fileName);
 
         if (!IsSupported(extension))
         {
-            throw new ArgumentOutOfRangeException(nameof(fileInfo), $"Extension {extension} is not supported");
+            throw new ArgumentOutOfRangeException(nameof(fileName), $"Extension {extension} is not supported");
         }
 
         return extension switch
@@ -214,7 +216,14 @@ internal static class FileTypes
             ".xlr" => "application/vnd.ms-works",
             ".eth" => "application/ethos",
             ".tsv" => "text/tab-separated-values",
-            _ => throw new ArgumentOutOfRangeException(nameof(fileInfo), $"Extension {extension} is not supported")
+            _ => throw new ArgumentOutOfRangeException(nameof(fileName), $"Extension {extension} is not supported")
         };
+    }
+
+    public static string GetMimeType(FileInfo fileInfo)
+    {
+        var fileName = fileInfo.Name;
+
+        return GetMimeType(fileName);
     }
 }

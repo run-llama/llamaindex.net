@@ -35,17 +35,10 @@ var fileUploadHandler = async (LlamaParseClient client, IFormFile file) =>
 {
     var fileName = file.FileName;
 
-    var path = Path.Combine(Path.GetTempPath(), fileName);
-
-    using (var fs = new FileStream(path, FileMode.OpenOrCreate))
-    {
-        file.CopyTo(fs);
-    }
-
-    var fileInfo = new FileInfo(path);
+    var inMemoryFile = new InMemoryFile(File.ReadAllBytes(fileName), fileName);
 
     var sb = new StringBuilder();
-    await foreach (var doc in client.LoadDataAsync(fileInfo))
+    await foreach (var doc in client.LoadDataAsync(inMemoryFile))
     {
         if(doc is ImageDocument)
         {
