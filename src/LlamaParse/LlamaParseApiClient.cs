@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.IO.Pipes;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,21 +60,19 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
 
     }
 
-    public async Task<string> CreateJob(FileInfo fileInfo, Configuration configuration, CancellationToken cancellationToken)
+    public async Task<string> CreateJob(Stream fileStream, string fileName , string mimeType, Configuration configuration, CancellationToken cancellationToken)
     {
         // upload file and create a job
         var uploadUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/upload");
 
-        var mimeType = FileTypes.GetMimeType(fileInfo);
         var form = new MultipartFormDataContent();
-        var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
 
         //  Set up the file content
         var fileContent = new StreamContent(fileStream);
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
 
         fileContent.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(
-            $"form-data; name=\"file\"; filename=\"{fileInfo.Name}\"");
+            $"form-data; name=\"file\"; filename=\"{fileName}\"");
 
         form.Add(fileContent);
 
@@ -114,10 +114,10 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
             if (response.Content != null)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}. Error: {error}");
+                throw new InvalidOperationException($"Failed to upload file: {fileName}. Error: {error}");
             }
 
-            throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}");
+            throw new InvalidOperationException($"Failed to upload file: {fileName}");
         }
 
         var responseBody = await response.Content.ReadAsStringAsync();
@@ -126,5 +126,14 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
 
         var id = jobCreationResult.GetProperty("id").GetString();
         return id!;
+    }
+
+    public Task<string> CreateJob(FileInfo fileInfo, Configuration configuration, CancellationToken cancellationToken)
+    {
+        var mimeType = FileTypes.GetMimeType(fileInfo);
+    
+        var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
+
+        return CreateJob(fileStream, fileInfo.Name, mimeType, configuration, cancellationToken);
     }
 }

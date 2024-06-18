@@ -8,6 +8,12 @@ using LlamaIndex.Core.Schema;
 
 namespace LlamaParse;
 
+public class InMemoryFile(Stream stream, string fileName)
+{
+    public Stream Stream { get; } = stream;
+    public string FileName { get; } = fileName;
+}
+
 public static class LlamaParseExtensions
 {
     public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, FileInfo file, bool splitByPage = false, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
