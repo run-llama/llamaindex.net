@@ -1,130 +1,109 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.Json;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+using LlamaIndex.Core.Schema;
+
 namespace LlamaParse;
 
-internal class LlamaParseClient(HttpClient client, string apiKey, string endpoint)
+public partial class LlamaParseClient(HttpClient client, string apiKey, string? endpoint = null, Configuration? configuration = null)
 {
-  
-    public async Task<byte[]> GetImage(string jobId, string imageName, CancellationToken cancellationToken)
+    public Configuration Configuration { get; } = configuration ?? new Configuration();
+
+    private readonly LlamaParseApiClient _client = new(client, apiKey, string.IsNullOrWhiteSpace(endpoint)
+        ? "https://api.cloud.llamaindex.ai"
+        : endpoint!);
+
+
+    public IAsyncEnumerable<RawResult> LoadDataRawAsync(FileInfo file, ResultType? resultType = null, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
-        var getImageUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{jobId}/result/image/{imageName}");
-        var request = new HttpRequestMessage(HttpMethod.Get, getImageUri);
-        request.Headers.Add("Authorization", $"Bearer {apiKey}");
-        var response = await client.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsByteArrayAsync();
-        return content!;
-    }
-    public async Task<JobStatus> GetJobStatusAsync(string jobId, CancellationToken cancellationToken)
-    {
-        var getStatusUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{jobId}");
-        var request = new HttpRequestMessage(HttpMethod.Get, getStatusUri);
-        request.Headers.Add("Authorization", $"Bearer {apiKey}");
-        var response = await client.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var statusString = JsonDocument.Parse(responseContent).RootElement.GetProperty("status").GetString();
-        return (JobStatus)Enum.Parse(typeof(JobStatus), statusString!, true);
-
-    }
-    public async Task<RawResult> GetJobResultAsync(string jobId, ResultType resultType, CancellationToken cancellationToken)
-    {
-        var getResultUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{jobId}/result/{resultType.ToString().ToLowerInvariant()}");
-        var request = new HttpRequestMessage(HttpMethod.Get, getResultUri);
-        request.Headers.Add("Authorization", $"Bearer {apiKey}");
-        var response = await client.SendAsync(request, cancellationToken);
-
-        response.EnsureSuccessStatusCode();
-        var resultString = await response.Content.ReadAsStringAsync();
-
-        var jsonElement = JsonDocument.Parse(resultString).RootElement;
-        var jobMetaData = jsonElement.GetProperty(Constants.JobMetadataKey);
-        return new RawResult(
-            jobId,
-            jsonElement,
-            null,
-            jobMetaData.GetProperty(Constants.CreditsUsedKey).GetDouble(),
-            jobMetaData.GetProperty(Constants.CreditsMaxKey).GetDouble(),
-            jobMetaData.GetProperty(Constants.JobCreditsUsageKey).GetDouble(),
-            jobMetaData.GetProperty(Constants.JobPagesKey).GetDouble(),
-            jobMetaData.GetProperty(Constants.JobIsCacheHitKey).GetBoolean());
-
+        return LoadDataRawAsync([file], resultType, metadata, cancellationToken);
     }
 
-    public async Task<string> CreateJob(FileInfo fileInfo, Configuration configuration, CancellationToken cancellationToken)
+    public async IAsyncEnumerable<RawResult> LoadDataRawAsync(IEnumerable<FileInfo> files,
+        ResultType? resultType = null,
+        Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        // upload file and create a job
-        var uploadUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/upload");
-
-        var mimeType = FileTypes.GetMimeType(fileInfo);
-        var form = new MultipartFormDataContent();
-        var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
-
-        //  Set up the file content
-        var fileContent = new StreamContent(fileStream);
-        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
-
-        fileContent.Headers.ContentDisposition = ContentDispositionHeaderValue.Parse(
-            $"form-data; name=\"file\"; filename=\"{fileInfo.Name}\"");
-
-        form.Add(fileContent);
-
-        // Add additional configuration to form data
-        form.Add(new StringContent(configuration.Language.ToLanguageCode()), "language");
-
-        if (!string.IsNullOrWhiteSpace(configuration.ParsingInstructions))
+        var jobs = new List<Job>();
+        foreach (var fileInfo in files)
         {
-            form.Add(new StringContent(configuration.ParsingInstructions), "parsing_instruction");
-        }
-
-        form.Add(new StringContent(configuration.InvalidateCache.ToString()), "invalidate_cache");
-        form.Add(new StringContent(configuration.SkipDiagonalText.ToString()), "skip_diagonal_text");
-        form.Add(new StringContent(configuration.DoNotCache.ToString()), "do_not_cache");
-        form.Add(new StringContent(configuration.FastMode.ToString()), "fast_mode");
-        form.Add(new StringContent(configuration.DoNotUnrollColumns.ToString()), "do_not_unroll_columns");
-
-        if (!string.IsNullOrWhiteSpace(configuration.ParsingInstructions))
-        {
-            form.Add(new StringContent(configuration.PageSeparator), "page_separator");
-        }
-
-        form.Add(new StringContent(configuration.Gpt4oMode.ToString()), "gpt4o_mode");
-
-        if (configuration.Gpt4oMode)
-        {
-            form.Add(new StringContent(configuration.Gpt4oApiKey), "gpt4o_api_key");
-        }
-
-        var request = new HttpRequestMessage(HttpMethod.Post, uploadUri);
-        request.Content = form;
-
-        request.Headers.Add("Authorization", $"Bearer {apiKey}");
-
-        var response = await client.SendAsync(request, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            if (response.Content != null)
+            if (cancellationToken.IsCancellationRequested)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}. Error: {error}");
+                yield break;
             }
 
-            throw new InvalidOperationException($"Failed to upload file: {fileInfo.FullName}");
+            var documentMetadata = metadata ?? new Dictionary<string, object>();
+
+            var job = await CreateJobAsync(fileInfo, documentMetadata, cancellationToken);
+            jobs.Add(job);
         }
 
-        var responseBody = await response.Content.ReadAsStringAsync();
+        if (cancellationToken.IsCancellationRequested) yield break;
 
-        var jobCreationResult = JsonDocument.Parse(responseBody).RootElement;
-
-        var id = jobCreationResult.GetProperty("id").GetString();
-        return id!;
+        foreach (var job in jobs)
+        {
+            var result = await job.GetRawResult(resultType?? Configuration.ResultType, cancellationToken);
+            yield return result;
+        }
     }
+
+    public IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, CancellationToken cancellationToken = default)
+    {
+        var jobId = document.Metadata[Constants.JobIdKey];
+        
+        return LoadImagesAsync(jobId.ToString(), document.Metadata, cancellationToken);
+    }
+
+    public IAsyncEnumerable<ImageDocument> LoadImagesAsync(RawResult rawResult, CancellationToken cancellationToken = default)
+    {
+        var jobId = rawResult.JobId;
+
+        return LoadImagesAsync(jobId, rawResult.Metadata, cancellationToken);
+    }
+
+    public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(string jobId, Dictionary<string, object>? documentMetadata = null ,[EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var metadata = documentMetadata?? new Dictionary<string, object>();
+
+        var job =  CreateJob(jobId, metadata, ResultType.Json);
+
+        await foreach (var image in job.GetImagesAsync(cancellationToken))
+        {
+            yield return image;
+        }
+    }
+
+    private Job CreateJob(string jobId, Dictionary<string, object> metadata, ResultType? resultType = null)
+    {
+        var documentMetadata = metadata;
+        var job = new Job(_client, documentMetadata, jobId, resultType?? Configuration.ResultType);
+        return job;
+    }
+
+    private async Task<Job> CreateJobAsync(FileInfo fileInfo, Dictionary<string, object> metadata, CancellationToken cancellationToken)
+    {
+        var fileInfoName = fileInfo.Name;
+
+        if (!FileTypes.IsSupported(fileInfo))
+        {
+            throw new InvalidOperationException($"Unsupported file type: {fileInfo.Name}");
+        }
+
+        if (!fileInfo.Exists)
+        {
+            throw new FileNotFoundException($"File not found: {fileInfo.FullName}");
+        }
+
+        // clone metadata
+        var documentMetadata = metadata;
+        documentMetadata["file_path"] = fileInfoName;
+  
+        using var activity = LlamaDiagnostics.StartCreateJob(fileInfo);
+        var id = await _client.CreateJob(fileInfo, Configuration, cancellationToken);
+        LlamaDiagnostics.EndCreateJob(activity, "succeeded", id);
+        return CreateJob(id, metadata, Configuration.ResultType); }
 }

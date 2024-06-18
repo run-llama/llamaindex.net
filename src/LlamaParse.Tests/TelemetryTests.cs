@@ -10,7 +10,7 @@ public class TelemetryTests
     [SkipOnKeyNotFoundFact]
     public async Task produces_telemetry_on_loading()
     {
-        AppContext.SetSwitch("LlamaParse.EnableOTelDiagnostics", true);
+        AppContext.SetSwitch("LlamaParseClient.EnableOTelDiagnostics", true);
 
         var activities = new Dictionary<string, Activity>();
 
@@ -38,7 +38,7 @@ public class TelemetryTests
         ActivitySource.AddActivityListener(listener);
 
         var config = new Configuration(extractImages: true);
-        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty,
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty,
             configuration:config);
 
         var fileInfo = new FileInfo("./data/polyglot_tool.pdf");

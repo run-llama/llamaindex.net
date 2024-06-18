@@ -10,16 +10,16 @@ namespace LlamaParse;
 
 public static class LlamaParseExtensions
 {
-    public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParse llamaParse, FileInfo file, bool splitByPage = false, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+    public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, FileInfo file, bool splitByPage = false, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
-        return llamaParse.LoadDataAsync([file], splitByPage, metadata, cancellationToken);
+        return llamaParseClient.LoadDataAsync([file], splitByPage, metadata, cancellationToken);
     }
 
-    public static  async IAsyncEnumerable<Document> LoadDataAsync(this LlamaParse llamaParse,IEnumerable<FileInfo> files, bool splitByPage = false, Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public static  async IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient,IEnumerable<FileInfo> files, bool splitByPage = false, Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var documentMetadata = metadata ?? new Dictionary<string, object>();
 
-        await foreach (var rawResult in llamaParse.LoadDataRawAsync(files, ResultType.Json, documentMetadata, cancellationToken))
+        await foreach (var rawResult in llamaParseClient.LoadDataRawAsync(files, ResultType.Json, documentMetadata, cancellationToken))
         {
             var jobId = rawResult.JobId;
 
@@ -29,7 +29,7 @@ public static class LlamaParseExtensions
             {
                 foreach (var page in result.GetProperty("pages").EnumerateArray())
                 {
-                    switch (llamaParse.Configuration.ResultType)
+                    switch (llamaParseClient.Configuration.ResultType)
                     {
                         case ResultType.Markdown:
                             if (page.TryGetProperty("md", out var markdown))
@@ -58,7 +58,7 @@ public static class LlamaParseExtensions
             }
             else
             {
-                if (llamaParse.Configuration.ResultType == ResultType.Json)
+                if (llamaParseClient.Configuration.ResultType == ResultType.Json)
                 {
                     yield return new Document(jobId, result.GetRawText(), documentMetadata);
 
@@ -67,7 +67,7 @@ public static class LlamaParseExtensions
                 var content = new StringBuilder();
                 foreach (var page in result.GetProperty("pages").EnumerateArray())
                 {
-                    switch (llamaParse.Configuration.ResultType)
+                    switch (llamaParseClient.Configuration.ResultType)
                     {
                         case ResultType.Markdown:
                             if (page.TryGetProperty("md", out var markdown))
@@ -89,9 +89,9 @@ public static class LlamaParseExtensions
                 yield return new Document(jobId, content.ToString(), documentMetadata);
             }
 
-            if (llamaParse.Configuration.ExtractImages)
+            if (llamaParseClient.Configuration.ExtractImages)
             {
-                await foreach (var image in llamaParse.LoadImagesAsync(jobId, documentMetadata, cancellationToken))
+                await foreach (var image in llamaParseClient.LoadImagesAsync(jobId, documentMetadata, cancellationToken))
                 {
                     yield return image;
                 }

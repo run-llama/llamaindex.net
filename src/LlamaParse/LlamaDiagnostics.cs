@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -10,8 +9,8 @@ internal static class LlamaDiagnostics
     private static readonly string Namespace = typeof(LlamaDiagnostics).Namespace!;
     private static readonly ActivitySource s_activitySource = new(Namespace);
 
-    private const string EnableDiagnosticsSwitch = "LlamaParse.EnableOTelDiagnostics";
-    private const string EnableSensitiveEventsSwitch = "LlamaParse.EnableOTelDiagnosticsSensitive";
+    private const string EnableDiagnosticsSwitch = "LlamaParseClient.EnableOTelDiagnostics";
+    private const string EnableSensitiveEventsSwitch = "LlamaParseClient.EnableOTelDiagnosticsSensitive";
     private const string EnableDiagnosticsEnvVar = "LLAMAPARSE_ENABLE_OTEL_DIAGNOSTICS";
     private const string EnableSensitiveEventsEnvVar = "LLAMAPARSE_ENABLE_OTEL_DIAGNOSTICS_SENSITIVE";
 

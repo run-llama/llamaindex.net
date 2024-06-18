@@ -11,7 +11,7 @@ public class ClientTests
     [Fact]
     public void throws_exception_when_parsing_unsupported_files()
     {
-        var llamaParseClient = new LlamaParse(new HttpClient(), "app key");
+        var llamaParseClient = new LlamaParseClient(new HttpClient(), "app key");
 
         var fileInfo = new FileInfo("test.ghh");
 
@@ -29,7 +29,7 @@ public class ClientTests
     [Fact]
     public void throws_exception_when_file_does_not_exist()
     {
-        var llamaParseClient = new LlamaParse(new HttpClient(), "app key");
+        var llamaParseClient = new LlamaParseClient(new HttpClient(), "app key");
 
         var fileInfo = new FileInfo("test.pdf");
 
@@ -47,7 +47,7 @@ public class ClientTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf()
     {
-        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY")??string.Empty);
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY")??string.Empty);
 
         var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
@@ -64,7 +64,7 @@ public class ClientTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_as_markdown()
     {
-        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
 
         var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
@@ -81,7 +81,7 @@ public class ClientTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_as_text()
     {
-        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
 
         var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
@@ -98,7 +98,7 @@ public class ClientTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_as_json()
     {
-        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty);
 
         var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
@@ -117,7 +117,7 @@ public class ClientTests
     {
         var configuration = new Configuration
             (extractImages: true);
-        var llamaParseClient = new LlamaParse(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, configuration: configuration);
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, configuration: configuration);
 
         var fileInfo = new FileInfo("./data/polyglot_tool.pdf");
 

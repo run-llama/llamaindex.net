@@ -15,10 +15,10 @@ namespace LlamaParse;
 public sealed class JobCancelledException(string message) : Exception(message);
 public sealed class JobFailedException(string message) : Exception(message);
 
-public partial class LlamaParse
+public partial class LlamaParseClient
 {
    private class Job(
-        LlamaParseClient client,
+        LlamaParseApiClient client,
         Dictionary<string, object> metadata,
         string id,
         ResultType resultType)
