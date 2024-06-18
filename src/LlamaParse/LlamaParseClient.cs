@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -11,6 +10,7 @@ namespace LlamaParse;
 
 internal class LlamaParseClient(HttpClient client, string apiKey, string endpoint)
 {
+  
     public async Task<byte[]> GetImage(string jobId, string imageName, CancellationToken cancellationToken)
     {
         var getImageUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{jobId}/result/image/{imageName}");
@@ -44,7 +44,16 @@ internal class LlamaParseClient(HttpClient client, string apiKey, string endpoin
         var resultString = await response.Content.ReadAsStringAsync();
 
         var jsonElement = JsonDocument.Parse(resultString).RootElement;
-        return new RawResult(jobId, jsonElement, null);
+        var jobMetaData = jsonElement.GetProperty(Constants.JobMetadataKey);
+        return new RawResult(
+            jobId, 
+            jsonElement,
+            null, 
+            jobMetaData.GetProperty(Constants.CreditsUsedKey).GetDouble(), 
+            jobMetaData.GetProperty(Constants.CreditsMaxKey).GetDouble(),
+            jobMetaData.GetProperty(Constants.JobCreditsUsageKey).GetDouble(),
+            jobMetaData.GetProperty(Constants.JobPagesKey).GetDouble(),
+            jobMetaData.GetProperty(Constants.JobIsCacheHitKey).GetBoolean());
     }
 
     public async Task<string> CreateJob(FileInfo fileInfo, Configuration configuration, CancellationToken cancellationToken)

@@ -19,7 +19,7 @@ public partial class LlamaParse
     {
         private readonly Dictionary<string, object> _metadata = new(metadata)
         {
-            [LlamaParseJobIdKey] = id
+            [Constants.JobIdKey] = id
         };
 
         public async Task<RawResult> GetRawResult(ResultType type, CancellationToken cancellationToken)
@@ -28,12 +28,12 @@ public partial class LlamaParse
             var rawResults =  await client.GetJobResultAsync(id, type, cancellationToken);
             var documentMetadata = new Dictionary<string, object>(_metadata);
             PopulateMetadataFromJobResult(rawResults.Result, documentMetadata);
-            return new RawResult(rawResults.JobId, rawResults.Result, documentMetadata);
+            return new RawResult(rawResults.JobId, rawResults.Result, documentMetadata, rawResults.CreditsUsed, rawResults.CreditsMax, rawResults.JobCreditsUsage, rawResults.JobPages, rawResults.IsCacheHit);
         }
 
         private static void PopulateMetadataFromJobResult(JsonElement results, IDictionary<string, object> documentMetadata)
         {
-            var jobMetadata = results.GetProperty(LlamaParseJobMetadataKey).Deserialize<Dictionary<string, JsonElement>>();
+            var jobMetadata = results.GetProperty(Constants.JobMetadataKey).Deserialize<Dictionary<string, JsonElement>>();
 
             if (jobMetadata is not null)
             {

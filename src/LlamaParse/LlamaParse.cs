@@ -12,9 +12,6 @@ namespace LlamaParse;
 
 public partial class LlamaParse(HttpClient client, string apiKey, string? endpoint = null, Configuration? configuration = null)
 {
-    private const string LlamaParseJobIdKey = "job_id";
-    private const string LlamaParseJobMetadataKey = "job_metadata";
-
     public Configuration Configuration { get; } = configuration ?? new Configuration();
 
     private readonly LlamaParseClient _client = new(client, apiKey, string.IsNullOrWhiteSpace(endpoint)
@@ -56,7 +53,7 @@ public partial class LlamaParse(HttpClient client, string apiKey, string? endpoi
 
     public IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, CancellationToken cancellationToken = default)
     {
-        var jobId = document.Metadata[LlamaParseJobIdKey];
+        var jobId = document.Metadata[Constants.JobIdKey];
         
         return LoadImagesAsync(jobId.ToString(), document.Metadata, cancellationToken);
     }
