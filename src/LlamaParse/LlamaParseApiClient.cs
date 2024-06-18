@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.IO.Pipes;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +10,6 @@ namespace LlamaParse;
 
 internal class LlamaParseApiClient(HttpClient client, string apiKey, string endpoint)
 {
-  
     public async Task<byte[]> GetImage(string jobId, string imageName, CancellationToken cancellationToken)
     {
         var getImageUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{jobId}/result/image/{imageName}");
@@ -24,6 +21,7 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
         var content = await response.Content.ReadAsByteArrayAsync();
         return content!;
     }
+
     public async Task<JobStatus> GetJobStatusAsync(string jobId, CancellationToken cancellationToken)
     {
         var getStatusUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{jobId}");
@@ -34,11 +32,14 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
         var responseContent = await response.Content.ReadAsStringAsync();
         var statusString = JsonDocument.Parse(responseContent).RootElement.GetProperty("status").GetString();
         return (JobStatus)Enum.Parse(typeof(JobStatus), statusString!, true);
-
     }
-    public async Task<RawResult> GetJobResultAsync(string jobId, ResultType resultType, CancellationToken cancellationToken)
+
+    public async Task<RawResult> GetJobResultAsync(string jobId, ResultType resultType,
+        CancellationToken cancellationToken)
     {
-        var getResultUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/job/{jobId}/result/{resultType.ToString().ToLowerInvariant()}");
+        var getResultUri =
+            new Uri(
+                $"{endpoint.TrimEnd('/')}/api/parsing/job/{jobId}/result/{resultType.ToString().ToLowerInvariant()}");
         var request = new HttpRequestMessage(HttpMethod.Get, getResultUri);
         request.Headers.Add("Authorization", $"Bearer {apiKey}");
         var response = await client.SendAsync(request, cancellationToken);
@@ -57,20 +58,17 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
             jobMetaData.GetProperty(Constants.JobCreditsUsageKey).GetDouble(),
             jobMetaData.GetProperty(Constants.JobPagesKey).GetDouble(),
             jobMetaData.GetProperty(Constants.JobIsCacheHitKey).GetBoolean());
-
     }
 
-    public async Task<string> CreateJob(ReadOnlyMemory<byte> data, string fileName , string mimeType, Configuration configuration, CancellationToken cancellationToken)
+    public async Task<string> CreateJob(ReadOnlyMemory<byte> data, string fileName, string mimeType,
+        Configuration configuration, CancellationToken cancellationToken)
     {
         // upload file and create a job
         var uploadUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/upload");
 
         var form = new MultipartFormDataContent();
 
-        if (string.IsNullOrWhiteSpace(mimeType))
-        {
-            mimeType = FileTypes.GetMimeType(fileName);
-        }
+        if (string.IsNullOrWhiteSpace(mimeType)) mimeType = FileTypes.GetMimeType(fileName);
 
         //  Set up the file content
         var fileContent = new ByteArrayContent(data.ToArray());
@@ -85,9 +83,7 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
         form.Add(new StringContent(configuration.Language.ToLanguageCode()), "language");
 
         if (!string.IsNullOrWhiteSpace(configuration.ParsingInstructions))
-        {
             form.Add(new StringContent(configuration.ParsingInstructions), "parsing_instruction");
-        }
 
         form.Add(new StringContent(configuration.InvalidateCache.ToString()), "invalidate_cache");
         form.Add(new StringContent(configuration.SkipDiagonalText.ToString()), "skip_diagonal_text");
@@ -96,16 +92,11 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
         form.Add(new StringContent(configuration.DoNotUnrollColumns.ToString()), "do_not_unroll_columns");
 
         if (!string.IsNullOrWhiteSpace(configuration.ParsingInstructions))
-        {
             form.Add(new StringContent(configuration.PageSeparator), "page_separator");
-        }
 
         form.Add(new StringContent(configuration.Gpt4oMode.ToString()), "gpt4o_mode");
 
-        if (configuration.Gpt4oMode)
-        {
-            form.Add(new StringContent(configuration.Gpt4oApiKey), "gpt4o_api_key");
-        }
+        if (configuration.Gpt4oMode) form.Add(new StringContent(configuration.Gpt4oApiKey), "gpt4o_api_key");
 
         var request = new HttpRequestMessage(HttpMethod.Post, uploadUri);
         request.Content = form;
@@ -139,6 +130,7 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
 
         var inMemoryFile = new InMemoryFile(File.ReadAllBytes(fileInfo.FullName), fileInfo.Name, mimeType);
 
-        return CreateJob(inMemoryFile.FileData, inMemoryFile.FileName, inMemoryFile.MimeType , configuration, cancellationToken);
+        return CreateJob(inMemoryFile.FileData, inMemoryFile.FileName, inMemoryFile.MimeType, configuration,
+            cancellationToken);
     }
 }
