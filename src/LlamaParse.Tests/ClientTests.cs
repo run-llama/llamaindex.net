@@ -1,7 +1,5 @@
-using System.Runtime.CompilerServices;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
-using System.Text;
 using SkiaSharp;
 
 namespace LlamaParse.Tests;
@@ -134,37 +132,5 @@ public class ClientTests
         }
 
         images.Should().NotBeEmpty();
-    }
-}
-
-internal class LoggingHandler(HttpMessageHandler innerHandler, [CallerMemberName] string name = "")
-    : DelegatingHandler(innerHandler)
-{
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        var log = new StringBuilder();
-        log.AppendLine("Request:");
-        log.AppendLine(request.ToString());
-        if (request.Content != null)
-        {
-            log.AppendLine(await request.Content.ReadAsStringAsync(cancellationToken));
-        }
-        log.AppendLine();
-        await File.WriteAllTextAsync(@$"D:\log_request_message_{name}.txt", log.ToString(), cancellationToken);
-
-        log.Clear();
-        var response = await base.SendAsync(request, cancellationToken);
-
-        log.AppendLine("Response:");
-        log.AppendLine(response.ToString());
-        if (response.Content != null)
-        {
-            log.AppendLine(await response.Content.ReadAsStringAsync(cancellationToken));
-        }
-        log.AppendLine();
-
-        var message = log.ToString();
-        await File.WriteAllTextAsync($@"D:\log_response_message_{name}.txt", message, cancellationToken); 
-        return response;
     }
 }
