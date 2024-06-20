@@ -1,0 +1,20 @@
+# LlamaParse + Aspire
+
+This sample shows how to add a LlamaParse client to a .NET Web API using Aspire.
+
+## Prerequisites
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) or greater
+- [Aspire workload](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [LlamaIndex API key](https://docs.cloud.llamaindex.ai/llamaparse/getting_started/get_an_api_key)
+- Visual Studio or Visual Studio Code
+
+## Configuration
+
+1. Add your LlamaParse API key to the *appsettings.Development.json* configuration in the `LlamaParseAspire` project.
+
+```json
+"LlamaParse": {
+    "ApiKey": "ADD-YOUR-KEY-HERE"
+}
+```
