@@ -81,22 +81,31 @@ public static class LlamaParseExtensions
                     case ResultType.Markdown:
                         if (page.TryGetProperty("md", out var markdown))
                         {
-                            document = new Document(Guid.NewGuid().ToString(), markdown.GetString(),
-                                pageMetadata);
+                            document = new Document(
+                                id:Guid.NewGuid().ToString(), 
+                                text:markdown.GetString(),
+                                mimeType: "text/markdown",
+                                metadata:pageMetadata);
                         }
 
                         break;
                     case ResultType.Text:
                         if (page.TryGetProperty("text", out var text))
                         {
-                            document = new  Document(Guid.NewGuid().ToString(), text.GetString(),
-                                pageMetadata);
+                            document = new  Document(
+                                id:Guid.NewGuid().ToString(), 
+                                text:text.GetString(),
+                                mimeType: "text/plain",
+                                metadata:pageMetadata);
                         }
 
                         break;
                     case ResultType.Json:
-                        document = new Document(Guid.NewGuid().ToString(), page.GetRawText(),
-                            pageMetadata);
+                        document = new Document(
+                            id:Guid.NewGuid().ToString(), 
+                            text:page.GetRawText(),
+                            mimeType: "application/json",
+                            metadata: pageMetadata);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -116,12 +125,24 @@ public static class LlamaParseExtensions
             if (llamaParseClient.Configuration.ResultType == ResultType.Json)
             {
                
-                yield return new Document(jobId, result.GetRawText(), documentMetadata);
+                yield return new Document(
+                    id:jobId, 
+                    text:result.GetRawText(),
+                    mimeType: "application/json",
+                    metadata: documentMetadata);
             }
+
+            var mimeType = llamaParseClient.Configuration.ResultType switch
+            {
+                ResultType.Markdown => "text/markdown",
+                ResultType.Text => "text/plain",
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
             var content = new StringBuilder();
             foreach (var page in result.GetProperty("pages").EnumerateArray())
             {
+                
                 switch (llamaParseClient.Configuration.ResultType)
                 {
                     case ResultType.Markdown:
@@ -141,7 +162,11 @@ public static class LlamaParseExtensions
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            yield return new Document(jobId, content.ToString(), documentMetadata);
+            yield return new Document(
+                id:jobId, 
+                text:content.ToString(),
+                mimeType: mimeType,
+                metadata:documentMetadata);
         }
 
         if (llamaParseClient.Configuration.ExtractImages)
