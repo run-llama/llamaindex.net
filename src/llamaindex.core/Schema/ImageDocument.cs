@@ -9,7 +9,8 @@ public class ImageDocument(
     string? imagePath = null,
     string? imageUrl = null,
     string? imageMimetype = null,
-    Dictionary<string, object>? metadata = null) : Document(id, text: text, metadata: metadata)
+    string? mimeType = null,
+    Dictionary<string, object>? metadata = null) : Document(id, text: text, mimeType: mimeType, metadata: metadata)
 {
     public string? Image { get; } = image;
     public string? ImagePath { get; } = imagePath;

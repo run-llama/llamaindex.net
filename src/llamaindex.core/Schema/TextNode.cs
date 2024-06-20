@@ -9,12 +9,14 @@ public class TextNode(
     string? text = null,
     int? startCharIndex = null,
     int? endCharIdx = null,
+    string? mimeType = null,
     Dictionary<string, object>? metadata = null) :
     BaseNode(id, metadata: metadata)
 {
     public string? Text { get; } = text;
     public int? StartCharIndex { get; } = startCharIndex;
     public int? EndCharIdx { get; } = endCharIdx;
+    public string? MimeType { get; } = mimeType;
 }
 
 [JsonConverter(typeof(BaseNodeConverter))]
@@ -25,6 +27,7 @@ public class ImageNode(
     string? imagePath = null,
     string? imageUrl = null,
     string? imageMimetype = null,
+    string? mimeType = null,
     Dictionary<string, object>? metadata = null)
     : BaseNode(id, metadata)
 {
@@ -33,4 +36,5 @@ public class ImageNode(
     public string? ImagePath { get; } = imagePath;
     public string? ImageUrl { get; } = imageUrl;
     public string? ImageMimetype { get; } = imageMimetype;
+    public string? MimeType { get; } = mimeType;
 }
