@@ -1,6 +1,6 @@
 # LlamaParse + Aspire
 
-This sample shows how to add a LlamaParse client to a .NET Web API using Aspire.
+This sample shows how to add a [LlamaParse](https://docs.llamaindex.ai/en/stable/llama_cloud/llama_parse/) client for file parsing to a .NET Web API using Aspire.
 
 ## Prerequisites
 
