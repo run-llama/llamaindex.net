@@ -111,7 +111,7 @@ public static class LlamaParseExtensions
                         throw new ArgumentOutOfRangeException();
                 }
 
-                if (document is { })
+                if (document is not null)
                 {
                     documentByPage[pageNumber] = new RelatedNodeInfo(document.Id, NodeType.Document, pageMetadata);
                     yield return document;
