@@ -63,43 +63,60 @@ public static class LlamaParseExtensions
 
         var result = rawResult.Result;
 
+        var documentByPage = new Dictionary<int, RelatedNodeInfo>();
+
         if (splitByPage)
         {
             foreach (var page in result.GetProperty("pages").EnumerateArray())
             {
+                var pageNumber = page.GetProperty("page").GetInt32();
+                var pageMetadata = new Dictionary<string, object>(documentMetadata)
+                {
+                    ["page_number"] = pageNumber
+                };
+
+                Document? document = null;
                 switch (llamaParseClient.Configuration.ResultType)
                 {
                     case ResultType.Markdown:
                         if (page.TryGetProperty("md", out var markdown))
                         {
-                            yield return new Document(Guid.NewGuid().ToString(), markdown.GetString(),
-                                documentMetadata);
+                            document = new Document(Guid.NewGuid().ToString(), markdown.GetString(),
+                                pageMetadata);
                         }
 
                         break;
                     case ResultType.Text:
                         if (page.TryGetProperty("text", out var text))
                         {
-                            yield return new Document(Guid.NewGuid().ToString(), text.GetString(),
-                                documentMetadata);
+                            document = new  Document(Guid.NewGuid().ToString(), text.GetString(),
+                                pageMetadata);
                         }
 
                         break;
                     case ResultType.Json:
-                        yield return new Document(Guid.NewGuid().ToString(), page.GetRawText(),
-                            documentMetadata);
+                        document = new Document(Guid.NewGuid().ToString(), page.GetRawText(),
+                            pageMetadata);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
+                }
+
+                if (document is { })
+                {
+                    documentByPage[pageNumber] = new RelatedNodeInfo(document.Id, NodeType.Document, pageMetadata);
+                    yield return document;
                 }
             }
         }
         else
         {
+            documentByPage[-1] = new RelatedNodeInfo(jobId, NodeType.Document, documentMetadata);
+
             if (llamaParseClient.Configuration.ResultType == ResultType.Json)
             {
+               
                 yield return new Document(jobId, result.GetRawText(), documentMetadata);
-
             }
 
             var content = new StringBuilder();
@@ -131,6 +148,14 @@ public static class LlamaParseExtensions
         {
             await foreach (var image in llamaParseClient.LoadImagesAsync(jobId, documentMetadata, cancellationToken))
             {
+                if (documentByPage.Count > 0)
+                {
+                    image.ParentNode =
+                        documentByPage.TryGetValue((int)image.Metadata["page_number"], out var nodeReference)
+                            ? nodeReference
+                            : documentByPage[-1];
+                }
+
                 yield return image;
             }
         }
