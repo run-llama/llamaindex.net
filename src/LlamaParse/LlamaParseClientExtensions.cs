@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace LlamaParse;
 
-public static class LlamaParseExtensions
+public static class LlamaParseClientExtensions
 {
     public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, FileInfo file, bool splitByPage = false, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
