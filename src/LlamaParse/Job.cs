@@ -116,7 +116,8 @@ public partial class LlamaParseClient
                         ["page_number"] = pageNumber,
                         ["image_name"] = name!,
                         ["image_height"] = height,
-                        ["image_width"] = width
+                        ["image_width"] = width,
+                        ["encoding"] = "base64"
                     };
 
                     var jobMetadata = rawResult.Result.GetProperty(Constants.JobMetadataKey).Deserialize<Dictionary<string, JsonElement>>();
