@@ -1,15 +1,5 @@
-﻿using System;
+﻿namespace LlamaParse;
 
-namespace LlamaParse;
-
-[Flags]
-public enum ItemType
-{
-    None = 0,
-    Image = 1,
-    Table = 2,
-
-}
 public class Configuration(
     Languages language = Languages.English,
     string? parsingInstructions = null,

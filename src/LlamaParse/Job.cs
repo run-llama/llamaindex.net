@@ -141,7 +141,9 @@ public partial class LlamaParseClient
                     var imageDocument = new ImageDocument(
                         id: Guid.NewGuid().ToString(),
                         image: encodedImage,
-                        metadata: pageMetadata
+                        metadata: pageMetadata,
+                        imageMimetype: "image/png",
+                        mimeType: "image/png"
                     );
 
                     LlamaDiagnostics.EndGetImageActivity(activity, reason: "succeeded");

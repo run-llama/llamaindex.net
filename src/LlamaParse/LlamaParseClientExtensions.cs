@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
+using static System.Net.Mime.MediaTypeNames;
+
 namespace LlamaParse;
 
 public static class LlamaParseClientExtensions
@@ -184,6 +186,46 @@ public static class LlamaParseClientExtensions
                 }
 
                 yield return image;
+            }
+        }
+
+        var extractTables = (llamaParseClient.Configuration.ItemsToInclude & ItemType.Table) == ItemType.Table;
+        if (extractTables)
+        {
+            foreach (var page in rawResult.Result.GetProperty("pages").EnumerateArray())
+            {
+                var tableIndex = 1;
+                foreach (var item in page.GetProperty("items").EnumerateArray())
+                {
+                    var type = item.GetProperty("type").GetString();
+                    if (type! == "table")
+                    {
+                        var rows = item.GetProperty("rows");
+                        var tableMetadata = new Dictionary<string, object>(documentMetadata)
+                        {
+                            ["page_number"] = page.GetProperty("page").GetInt32(),
+                            ["table_index"] = tableIndex++,
+                            ["table_rows"] = rows.GetArrayLength(),
+                            ["table_format"] = "list of arrays"
+                        };
+                        var tableDocument = new Document(
+                            id: Guid.NewGuid().ToString(),
+                            text: rows.GetRawText(),
+                            mimeType: "application/json",
+                            metadata: tableMetadata
+                        );
+
+                        if (documentByPage.Count > 0)
+                        {
+                            tableDocument.ParentNode =
+                                documentByPage.TryGetValue((int)tableMetadata["page_number"], out var nodeReference)
+                                    ? nodeReference
+                                    : documentByPage[-1];
+                        }
+
+                        yield return tableDocument;
+                    }
+                }
             }
         }
     }
