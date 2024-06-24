@@ -1,5 +1,15 @@
-﻿namespace LlamaParse;
+﻿using System;
 
+namespace LlamaParse;
+
+[Flags]
+public enum ItemType
+{
+    None = 0,
+    Image = 1,
+    Table = 2,
+
+}
 public class Configuration(
     Languages language = Languages.English,
     string? parsingInstructions = null,
@@ -11,7 +21,7 @@ public class Configuration(
     string? pageSeparator = null,
     bool gpt4oMode = false,
     string? gpt4oApiKey = null,
-    bool extractImages = false,
+    ItemType itemsToInclude = ItemType.None,
     ResultType resultType = default)
 {
     public Languages Language { get; } = language;
@@ -24,6 +34,6 @@ public class Configuration(
     public string? PageSeparator { get; } = pageSeparator;
     public bool Gpt4oMode { get; } = gpt4oMode;
     public string? Gpt4oApiKey { get; } = gpt4oApiKey;
-    public bool ExtractImages { get; } = extractImages;
+    public ItemType ItemsToInclude { get; } = itemsToInclude;
     public ResultType ResultType { get; } = resultType;
 }

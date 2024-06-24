@@ -64,7 +64,7 @@ public static class LlamaParseClientExtensions
         var result = rawResult.Result;
 
         var documentByPage = new Dictionary<int, RelatedNodeInfo>();
-
+        
         if (splitByPage)
         {
             foreach (var page in result.GetProperty("pages").EnumerateArray())
@@ -169,9 +169,11 @@ public static class LlamaParseClientExtensions
                 metadata:documentMetadata);
         }
 
-        if (llamaParseClient.Configuration.ExtractImages)
+        var extractImages = (llamaParseClient.Configuration.ItemsToInclude & ItemType.Image) == ItemType.Image;
+        
+        if (extractImages)
         {
-            await foreach (var image in llamaParseClient.LoadImagesAsync(jobId, documentMetadata, cancellationToken))
+            await foreach (var image in llamaParseClient.LoadImagesAsync(rawResult, cancellationToken))
             {
                 if (documentByPage.Count > 0)
                 {
