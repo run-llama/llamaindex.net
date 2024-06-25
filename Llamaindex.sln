@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{87989DE6-A7D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{CC0A7E3A-2FFA-47FB-8061-228E2CFBB140}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaIndex.Core", "src\Llamaindex.core\LlamaIndex.Core.csproj", "{BA4CF140-1425-48C4-AD47-EDF203CFF214}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaIndex.Core", "src\LlamaIndex.Core\LlamaIndex.Core.csproj", "{BA4CF140-1425-48C4-AD47-EDF203CFF214}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaParse", "src\LlamaParse\LlamaParse.csproj", "{79489D75-8EEB-4B20-A03D-870A9DB503EB}"
 EndProject
