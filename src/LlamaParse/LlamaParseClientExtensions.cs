@@ -66,7 +66,7 @@ public static class LlamaParseClientExtensions
         var result = rawResult.Result;
 
         var documentByPage = new Dictionary<int, RelatedNodeInfo>();
-        
+
         if (splitByPage)
         {
             foreach (var page in result.GetProperty("pages").EnumerateArray())
@@ -84,28 +84,28 @@ public static class LlamaParseClientExtensions
                         if (page.TryGetProperty("md", out var markdown))
                         {
                             document = new Document(
-                                id:Guid.NewGuid().ToString(), 
-                                text:markdown.GetString(),
+                                id: Guid.NewGuid().ToString(),
+                                text: markdown.GetString(),
                                 mimeType: "text/markdown",
-                                metadata:pageMetadata);
+                                metadata: pageMetadata);
                         }
 
                         break;
                     case ResultType.Text:
                         if (page.TryGetProperty("text", out var text))
                         {
-                            document = new  Document(
-                                id:Guid.NewGuid().ToString(), 
-                                text:text.GetString(),
+                            document = new Document(
+                                id: Guid.NewGuid().ToString(),
+                                text: text.GetString(),
                                 mimeType: "text/plain",
-                                metadata:pageMetadata);
+                                metadata: pageMetadata);
                         }
 
                         break;
                     case ResultType.Json:
                         document = new Document(
-                            id:Guid.NewGuid().ToString(), 
-                            text:page.GetRawText(),
+                            id: Guid.NewGuid().ToString(),
+                            text: page.GetRawText(),
                             mimeType: "application/json",
                             metadata: pageMetadata);
                         break;
@@ -126,10 +126,10 @@ public static class LlamaParseClientExtensions
 
             if (llamaParseClient.Configuration.ResultType == ResultType.Json)
             {
-               
+
                 yield return new Document(
-                    id:jobId, 
-                    text:result.GetRawText(),
+                    id: jobId,
+                    text: result.GetRawText(),
                     mimeType: "application/json",
                     metadata: documentMetadata);
             }
@@ -144,7 +144,7 @@ public static class LlamaParseClientExtensions
             var content = new StringBuilder();
             foreach (var page in result.GetProperty("pages").EnumerateArray())
             {
-                
+
                 switch (llamaParseClient.Configuration.ResultType)
                 {
                     case ResultType.Markdown:
@@ -165,14 +165,14 @@ public static class LlamaParseClientExtensions
                 }
             }
             yield return new Document(
-                id:jobId, 
-                text:content.ToString(),
+                id: jobId,
+                text: content.ToString(),
                 mimeType: mimeType,
-                metadata:documentMetadata);
+                metadata: documentMetadata);
         }
 
         var extractImages = (llamaParseClient.Configuration.ItemsToInclude & ItemType.Image) == ItemType.Image;
-        
+
         if (extractImages)
         {
             await foreach (var image in llamaParseClient.LoadImagesAsync(rawResult, cancellationToken))
@@ -190,6 +190,7 @@ public static class LlamaParseClientExtensions
         }
 
         var extractTables = (llamaParseClient.Configuration.ItemsToInclude & ItemType.Table) == ItemType.Table;
+
         if (extractTables)
         {
             await foreach (var table in llamaParseClient.LoadTablesAsync(rawResult, cancellationToken))
