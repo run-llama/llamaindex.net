@@ -156,4 +156,39 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
         LlamaDiagnostics.EndCreateJob(activity, "succeeded", id);
         return CreateJob(id, metadata, Configuration.ResultType);
     }
+
+    public async IAsyncEnumerable<Document> LoadTablesAsync(RawResult rawResult, CancellationToken cancellationToken = default)
+    {
+        await Task.Yield();
+        var metadata = rawResult.Metadata ?? new Dictionary<string, object>();
+
+        foreach (var page in rawResult.Result.GetProperty("pages").EnumerateArray())
+        {
+            var tableIndex = 1;
+            foreach (var item in page.GetProperty("items").EnumerateArray())
+            {
+                var type = item.GetProperty("type").GetString();
+                if (type! == "table")
+                {
+                    var rows = item.GetProperty("rows");
+                    var tableMetadata = new Dictionary<string, object>(metadata)
+                    {
+                        ["page_number"] = page.GetProperty("page").GetInt32(),
+                        ["table_index"] = tableIndex++,
+                        ["table_rows"] = rows.GetArrayLength(),
+                        ["table_format"] = "list of arrays"
+                    };
+                    var tableDocument = new Document(
+                        id: Guid.NewGuid().ToString(),
+                        text: rows.GetRawText(),
+                        mimeType: "application/json",
+                        metadata: tableMetadata
+                    );
+
+                   
+                    yield return tableDocument;
+                }
+            }
+        }
+    }
 }
