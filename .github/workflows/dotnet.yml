@@ -32,4 +32,4 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Pack nugets
-      run: dotnet pack -c Release -p VersionPrefix=${{github.event.release.tag_name}} -p ReleaseNotes="${{github.event.release.body}}" --output .
+      run: dotnet pack -c Release /p:Version=${{ steps.dateStep.outputs.buildVersion }} -p ReleaseNotes="${{github.event.release.body}}" --output .
