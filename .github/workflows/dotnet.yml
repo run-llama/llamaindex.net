@@ -24,7 +24,11 @@ jobs:
     - name: Install .NET Aspire workload
       run: dotnet workload install aspire
 
-
+    - name: Set version
+      run: |
+       echo "Buid version is ${{github.run_number}}"
+       sed -i "s/\(<Version>\([0-9]\+\.\)\{2\}\)\([0-9]\+\)/\1${{github.run_number}}/" ${{env.PROJECT_FILE}}       
+       
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
