@@ -24,6 +24,24 @@ jobs:
     - name: Install .NET Aspire workload
       run: dotnet workload install aspire
 
+    - name: Set Build Variables
+      id: dateStep
+      run: |
+        export sha7=${SHA7::7}
+        export buildVersion=$(date '+%y.%-m.%-d.%-H%M-alpha')
+        export buildMode='Debug'
+        if [ $GITHUB_REF_NAME = "release" ]
+        then
+            export buildVersion=$(date '+%y.%-m.%-d.%-H%M')
+            export buildMode='Release'
+            export bumpBranch='release'
+        fi
+        echo "::set-output name=buildVersion::$buildVersion"
+        echo "::set-output name=buildMode::$buildMode"
+        echo "::set-output name=bumpBranch::$bumpBranch"
+        echo "::set-output name=sha7::$sha7"
+        echo "::set-output name=buildChangeSet::$(git diff --name-only --diff-filter=ACMRT ${{ github.event.before }} ${{ github.sha }} | grep .yml$)"
+
 
     - name: Restore dependencies
       run: dotnet restore
