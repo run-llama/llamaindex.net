@@ -26,8 +26,8 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build -c Release --no-restore
+      run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Pack nugets
-      run: dotnet pack -c Release --no-build --output .
+      run: dotnet pack -c Release --output .
