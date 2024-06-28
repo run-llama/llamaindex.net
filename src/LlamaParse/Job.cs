@@ -120,6 +120,16 @@ public partial class LlamaParseClient
                         ["encoding"] = "base64"
                     };
 
+                    if (imageElement.TryGetProperty("real_width", out var realWidth))
+                    {
+                        pageMetadata["real_width"] = realWidth.GetInt32();
+                    }
+
+                    if (imageElement.TryGetProperty("real_height", out var realHeight))
+                    {
+                        pageMetadata["real_height"] = realHeight.GetInt32();
+                    }
+
                     var jobMetadata = rawResult.Result.GetProperty(Constants.JobMetadataKey).Deserialize<Dictionary<string, JsonElement>>();
 
                     if (jobMetadata is not null)
