@@ -30,11 +30,11 @@ jobs:
         export sha7=${SHA7::7}
         export buildVersion=0.0.0-beta${{ github.run_number }}
       
-        echo "::set-output name=buildVersion::$buildVersion"
-        echo "::set-output name=buildMode::$buildMode"
-        echo "::set-output name=bumpBranch::$bumpBranch"
-        echo "::set-output name=sha7::$sha7"
-        echo "::set-output name=buildChangeSet::$(git diff --name-only --diff-filter=ACMRT ${{ github.event.before }} ${{ github.sha }} | grep .yml$)"
+        echo "buildVersion=$buildVersion" >> $GITHUB_OUTPUT
+        echo "buildMode=$buildMode" >> $GITHUB_OUTPUT
+        echo "bumpBranch=$bumpBranch" >> $GITHUB_OUTPUT
+        echo "sha7=$sha7" >> $GITHUB_OUTPUT
+        echo "buildChangeSet=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.before }} ${{ github.sha }} | grep .yml$)" >> $GITHUB_OUTPUT
 
 
     - name: Restore dependencies
