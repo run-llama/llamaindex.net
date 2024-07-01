@@ -7,17 +7,33 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
-using static System.Net.Mime.MediaTypeNames;
-
 namespace LlamaParse;
 
 public static class LlamaParseClientExtensions
 {
+    /// <summary>
+    /// Loads data asynchronously from a file.
+    /// </summary>
+    /// <param name="llamaParseClient">The LlamaParseClient instance.</param>
+    /// <param name="file">The file to load data from.</param>
+    /// <param name="splitByPage">Indicates whether to split the data by page.</param>
+    /// <param name="metadata">Optional metadata for the document.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>An asynchronous enumerable of Document objects.</returns>
     public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, FileInfo file, bool splitByPage = false, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
         return llamaParseClient.LoadDataAsync([file], splitByPage, metadata, cancellationToken);
     }
 
+    /// <summary>
+    /// Loads data asynchronously from a file.
+    /// </summary>
+    /// <param name="llamaParseClient">The LlamaParseClient instance.</param>
+    /// <param name="inMemoryFile">The file to load data from. <see cref="InMemoryFile"/></param>
+    /// <param name="splitByPage">Indicates whether to split the data by page.</param>
+    /// <param name="metadata">Optional metadata for the document.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>An asynchronous enumerable of Document objects.</returns>
     public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, InMemoryFile inMemoryFile, bool splitByPage = false, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
         return llamaParseClient.LoadDataAsync([inMemoryFile], splitByPage, metadata, cancellationToken);
