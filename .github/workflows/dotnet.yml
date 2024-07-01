@@ -26,15 +26,10 @@ jobs:
 
     - name: Set Build Variables
       id: dateStep
-      run: |
-        export sha7=${SHA7::7}
-        export buildVersion=0.0.0-beta${{ github.run_number }}
-      
-        echo "buildVersion=$buildVersion" >> $GITHUB_OUTPUT
+      run: |      
+        echo "buildVersion=0.0.0-beta${{ github.run_number }}" >> $GITHUB_OUTPUT
         echo "buildMode=$buildMode" >> $GITHUB_OUTPUT
         echo "bumpBranch=$bumpBranch" >> $GITHUB_OUTPUT
-        echo "sha7=$sha7" >> $GITHUB_OUTPUT
-        echo "buildChangeSet=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.before }} ${{ github.sha }} | grep .yml$)" >> $GITHUB_OUTPUT
 
 
     - name: Restore dependencies
