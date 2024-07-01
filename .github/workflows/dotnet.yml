@@ -28,7 +28,7 @@ jobs:
       id: dateStep
       run: |
         export sha7=${SHA7::7}
-        export buildVersion=$(date '0.0.0-beta${{ github.run_number }}')
+        export buildVersion=0.0.0-beta${{ github.run_number }}
       
         echo "::set-output name=buildVersion::$buildVersion"
         echo "::set-output name=buildMode::$buildMode"
