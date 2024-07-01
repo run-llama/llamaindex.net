@@ -39,7 +39,6 @@ public static class LlamaParseClientExtensions
         return llamaParseClient.LoadDataAsync([inMemoryFile], splitByPage, metadata, cancellationToken);
     }
 
-
     /// <summary>
     /// Loads data asynchronously from in-memory files.
     /// </summary>

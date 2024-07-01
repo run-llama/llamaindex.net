@@ -5,8 +5,18 @@ namespace LlamaParse;
 [Flags]
 public enum ItemType
 {
+    /// <summary>
+    /// No item type.
+    /// </summary>
     None = 0,
-    Image = 1,
-    Table = 2,
 
+    /// <summary>
+    /// Image item type.
+    /// </summary>
+    Image = 1,
+
+    /// <summary>
+    /// Table item type.
+    /// </summary>
+    Table = 2,
 }
