@@ -22,7 +22,7 @@ public class RetrieverClient(Uri host, string vectorDbCollectionName) : BaseRetr
 
         var responseContent = await response.Result.Content.ReadAsStringAsync();
         var nodesWithScores = JsonSerializer.Deserialize<NodeWithScore[]>(responseContent);
-        return nodesWithScores ?? Array.Empty<NodeWithScore>();
+        return nodesWithScores ?? [];
 
     }
 
