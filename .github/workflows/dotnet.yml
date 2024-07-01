@@ -28,14 +28,8 @@ jobs:
       id: dateStep
       run: |
         export sha7=${SHA7::7}
-        export buildVersion=$(date '+%y.%-m.%-d.%-H%M-alpha')
-        export buildMode='Debug'
-        if [ $GITHUB_REF_NAME = "release" ]
-        then
-            export buildVersion=$(date '+%y.%-m.%-d.%-H%M')
-            export buildMode='Release'
-            export bumpBranch='release'
-        fi
+        export buildVersion=$(date '0.0.0-beta${{ github.run_number }}')
+      
         echo "::set-output name=buildVersion::$buildVersion"
         echo "::set-output name=buildMode::$buildMode"
         echo "::set-output name=bumpBranch::$bumpBranch"
