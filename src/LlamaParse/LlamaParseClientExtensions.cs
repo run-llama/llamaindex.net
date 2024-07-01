@@ -40,6 +40,15 @@ public static class LlamaParseClientExtensions
     }
 
 
+    /// <summary>
+    /// Loads data asynchronously from in-memory files.
+    /// </summary>
+    /// <param name="llamaParseClient">The LlamaParseClient instance.</param>
+    /// <param name="inMemoryFiles">The in-memory files to load data from. <see cref="inMemoryFiles"/> </param>
+    /// <param name="splitByPage">Indicates whether to split the data by page.</param>
+    /// <param name="metadata">Optional metadata for the document.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>An asynchronous enumerable of Document objects.</returns>
     public static async IAsyncEnumerable<Document> LoadDataAsync(
         this LlamaParseClient llamaParseClient,
         IEnumerable<InMemoryFile> inMemoryFiles,
@@ -59,6 +68,15 @@ public static class LlamaParseClientExtensions
 
     }
 
+    /// <summary>
+    /// Loads data asynchronously from files.
+    /// </summary>
+    /// <param name="llamaParseClient">The LlamaParseClient instance.</param>
+    /// <param name="files">The files to load data from.</param>
+    /// <param name="splitByPage">Indicates whether to split the data by page.</param>
+    /// <param name="metadata">Optional metadata for the document.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>An asynchronous enumerable of Document objects.</returns>
     public static async IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, IEnumerable<FileInfo> files, bool splitByPage = false, Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var documentMetadata = metadata ?? new Dictionary<string, object>();

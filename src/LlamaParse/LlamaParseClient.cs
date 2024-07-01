@@ -38,11 +38,19 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
         return LoadDataRawAsync(inMemoryFile, resultType, metadata, cancellationToken);
     }
 
+    /// <summary>
+    /// Loads data from a file asynchronously and returns the raw results.
+    /// </summary>
+    /// <param name="inMemoryFile">The in-memory file to load.</param>
+    /// <param name="resultType">The type of result to retrieve. (Optional) <see cref="ResultType"/></param>
+    /// <param name="metadata">Additional metadata for the document. (Optional)</param>
+    /// <param name="cancellationToken">The cancellation token. (Optional)</param>
+    /// <returns>An asynchronous enumerable of RawResult objects representing the loaded data.</returns>
     public IAsyncEnumerable<RawResult> LoadDataRawAsync(InMemoryFile inMemoryFile, ResultType? resultType = null, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
     {
-
         return LoadDataRawAsync([inMemoryFile], resultType, metadata, cancellationToken);
     }
+
 
     /// <summary>
     /// Loads data from a file asynchronously and returns the raw results.
@@ -128,7 +136,7 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
     /// <summary>
     /// Loads images from a document asynchronously.
     /// </summary>
-    /// <param name="document">The document containing the image metadata.</param>
+    /// <param name="document">The document containing the image metadata. <see cref="Document"/></param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>An asynchronous enumerable of ImageDocument objects representing the loaded images.</returns>
     public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -189,7 +197,7 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
     /// <summary>
     /// Loads tables from a raw result asynchronously.
     /// </summary>
-    /// <param name="rawResult">The raw result containing the tables.</param>
+    /// <param name="rawResult">The raw result containing the tables. <see cref="RawResult"/></param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>An asynchronous enumerable of Document objects representing the tables.</returns>
     public async IAsyncEnumerable<Document> LoadTablesAsync(RawResult rawResult, [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -219,7 +227,6 @@ public partial class LlamaParseClient(HttpClient client, string apiKey, string? 
                         mimeType: "application/json",
                         metadata: tableMetadata
                     );
-
 
                     yield return tableDocument;
                 }
