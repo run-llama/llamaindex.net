@@ -19,7 +19,7 @@ public class Configuration
     /// <param name="pageSeparator">The page separator.</param>
     /// <param name="gpt4oMode">Whether to enable GPT-4o mode.</param>
     /// <param name="gpt4oApiKey">The GPT-4o API key.</param>
-    /// <param name="itemsToInclude">The items to include.</param>
+    /// <param name="itemsToExtract">The items to extract while processing.</param>
     /// <param name="resultType">The result type.</param>
     public Configuration(
         Languages language = Languages.English,
@@ -32,7 +32,7 @@ public class Configuration
         string? pageSeparator = null,
         bool gpt4oMode = false,
         string? gpt4oApiKey = null,
-        ItemType itemsToInclude = ItemType.None,
+        ItemType itemsToExtract = ItemType.None,
         ResultType resultType = default)
     {
         Language = language;
@@ -45,7 +45,7 @@ public class Configuration
         PageSeparator = pageSeparator;
         Gpt4oMode = gpt4oMode;
         Gpt4oApiKey = gpt4oApiKey;
-        ItemsToInclude = itemsToInclude;
+        ItemsToExtract = itemsToExtract;
         ResultType = resultType;
     }
 
@@ -102,7 +102,7 @@ public class Configuration
     /// <summary>
     /// Gets the items to include.
     /// </summary>
-    public ItemType ItemsToInclude { get; }
+    public ItemType ItemsToExtract { get; }
 
     /// <summary>
     /// Gets the result type.

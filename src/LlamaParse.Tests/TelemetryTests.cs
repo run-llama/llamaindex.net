@@ -37,7 +37,7 @@ public class TelemetryTests
 
         ActivitySource.AddActivityListener(listener);
 
-        var config = new Configuration(itemsToInclude: ItemType.Image);
+        var config = new Configuration(itemsToExtract: ItemType.Image);
         var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty,
             configuration:config);
 

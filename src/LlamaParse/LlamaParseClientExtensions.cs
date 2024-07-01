@@ -204,7 +204,7 @@ public static class LlamaParseClientExtensions
                 metadata: documentMetadata);
         }
 
-        var extractImages = (llamaParseClient.Configuration.ItemsToInclude & ItemType.Image) == ItemType.Image;
+        var extractImages = (llamaParseClient.Configuration.ItemsToExtract & ItemType.Image) == ItemType.Image;
 
         if (extractImages)
         {
@@ -222,7 +222,7 @@ public static class LlamaParseClientExtensions
             }
         }
 
-        var extractTables = (llamaParseClient.Configuration.ItemsToInclude & ItemType.Table) == ItemType.Table;
+        var extractTables = (llamaParseClient.Configuration.ItemsToExtract & ItemType.Table) == ItemType.Table;
 
         if (extractTables)
         {

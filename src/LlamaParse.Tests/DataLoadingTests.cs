@@ -41,7 +41,7 @@ public class DataLoadingTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_file_by_page_and_include_images()
     {
-        var configuration = new Configuration(itemsToInclude: ItemType.Image);
+        var configuration = new Configuration(itemsToExtract: ItemType.Image);
         var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, configuration:configuration);
 
         var fileInfo = new FileInfo("./data/polyglot_tool.pdf");
@@ -60,7 +60,7 @@ public class DataLoadingTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_file_by_page_and_include_table()
     {
-        var configuration = new Configuration(itemsToInclude: ItemType.Table);
+        var configuration = new Configuration(itemsToExtract: ItemType.Table);
         var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, configuration: configuration);
 
         var fileInfo = new FileInfo("./data/polyglot_tool.pdf");
