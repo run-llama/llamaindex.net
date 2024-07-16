@@ -1,6 +1,7 @@
 using LlamaIndex.Core.Schema;
 using LlamaParse;
 using System.Text;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,12 +12,7 @@ builder.AddServiceDefaults();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddTransient<LlamaParseClient>(sp =>
-{
-    var client = sp.GetRequiredService<HttpClient>();
-    var llamaParseClient = new LlamaParseClient(client, apiKey: builder.Configuration.GetSection("LlamaParse")["ApiKey"]!);
-    return llamaParseClient;
-});
+builder.AddLlamaParseClient(apiKey: builder.Configuration.GetSection("LlamaParse")["ApiKey"]!);
 
 var app = builder.Build();
 
@@ -35,7 +31,11 @@ var fileUploadHandler = async (LlamaParseClient client, IFormFile file) =>
 {
     var fileName = file.FileName;
 
-    var inMemoryFile = new InMemoryFile(File.ReadAllBytes(fileName), fileName);
+    // Read the file into a byte array
+    using var ms = new MemoryStream();
+    file.CopyTo(ms);
+
+    var inMemoryFile = new InMemoryFile(ms.ToArray(), fileName);
 
     var sb = new StringBuilder();
     await foreach (var doc in client.LoadDataAsync(inMemoryFile))
