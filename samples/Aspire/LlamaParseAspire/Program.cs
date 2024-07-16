@@ -1,7 +1,6 @@
 using LlamaIndex.Core.Schema;
 using LlamaParse;
 using System.Text;
-using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
