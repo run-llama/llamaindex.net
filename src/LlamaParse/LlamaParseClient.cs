@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace LlamaParse;
 
-public partial class LlamaParseClient(HttpClient client, string apiKey, string? endpoint = null, Configuration? configuration = null)
+public partial class LlamaParseClient(HttpClient client, Configuration configuration)
 {
-    public Configuration Configuration { get; } = configuration ?? new Configuration();
+    public Configuration Configuration { get; } = configuration;
 
-    private readonly LlamaParseApiClient _client = new(client, apiKey, string.IsNullOrWhiteSpace(endpoint)
+    private readonly LlamaParseApiClient _client = new(client, configuration.ApiKey, string.IsNullOrWhiteSpace(configuration.Endpoint)
         ? "https://api.cloud.llamaindex.ai"
-        : endpoint!);
+        : configuration.Endpoint!);
 
 
     /// <summary>
