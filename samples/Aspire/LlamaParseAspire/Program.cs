@@ -11,7 +11,7 @@ builder.AddServiceDefaults();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.AddLlamaParseClient(apiKey: builder.Configuration.GetSection("LlamaParse")["ApiKey"]!);
+builder.AddLlamaParseClient(builder.Configuration.GetSection("LlamaParse").Get<Configuration>()!);
 
 var app = builder.Build();
 

@@ -96,21 +96,21 @@ public static class LlamaParseClientExtensions
     /// Adds a LlamaParseClient to the service collection
     /// </summary>
     /// <param name="builder">The <see cref="IHostApplicationBuilder" /> to read config from and add services to.</param>
-    /// <param name="apiKey">The LlamaCloud API key</param>
-    public static void AddLlamaParseClient(this IHostApplicationBuilder builder, string apiKey, string? endpoint = null, Configuration? configuration = null)
+    /// <param name="configuration">The configuration <see cref="Configuration"/></param>
+    public static void AddLlamaParseClient(this IHostApplicationBuilder builder, Configuration configuration)
     {
-        builder.Services.AddSingleton(p => ConfigureClient(p, apiKey, endpoint, configuration));
+        builder.Services.AddSingleton(p => ConfigureClient(p, configuration));
     }
 
     /// <summary>
     /// Adds a keyed LlamaParseClient to the service collection
     /// </summary>
     /// <param name="builder">The <see cref="IHostApplicationBuilder" /> to read config from and add services to.</param>
-    /// <param name="apiKey">The LlamaCloud API key</param>
+    /// <param name="configuration">The configuration <see cref="Configuration"/></param>
     /// <param name="name">The service keyed name</param>
-    public static void AddKeyedLlamaParseClient(this IHostApplicationBuilder builder, string name, string apiKey, string? endpoint = null, Configuration? configuration = null)
+    public static void AddKeyedLlamaParseClient(this IHostApplicationBuilder builder, string name, Configuration configuration)
     {
-        builder.Services.AddKeyedSingleton<LlamaParseClient>(name, (p, _) => ConfigureClient(p, apiKey, endpoint, configuration));
+        builder.Services.AddKeyedSingleton<LlamaParseClient>(name, (p, _) => ConfigureClient(p, configuration));
     }
 
     private static async IAsyncEnumerable<Document> CreateDocumentsFromRawResult(LlamaParseClient llamaParseClient,
@@ -265,10 +265,10 @@ public static class LlamaParseClientExtensions
         }
     }
 
-    private static LlamaParseClient ConfigureClient(IServiceProvider provider, string apiKey, string? endpoint, Configuration? configuration)
+    private static LlamaParseClient ConfigureClient(IServiceProvider provider,  Configuration configuration)
     {
         var client = provider.GetRequiredService<HttpClient>();
-        var llamaParseClient = new LlamaParseClient(client, apiKey: apiKey, endpoint, configuration);
+        var llamaParseClient = new LlamaParseClient(client, configuration);
         return llamaParseClient;
     }
 }

@@ -10,6 +10,7 @@ public class Configuration
     /// Initializes a new instance of the <see cref="Configuration"/> class.
     /// </summary>
     /// <param name="language">The language to use for parsing.</param>
+    /// <param name="endpoint">The Llama cloud endpoint</param>
     /// <param name="parsingInstructions">The parsing instructions.</param>
     /// <param name="skipDiagonalText">Whether to skip diagonal text.</param>
     /// <param name="invalidateCache">Whether to invalidate the cache.</param>
@@ -21,8 +22,11 @@ public class Configuration
     /// <param name="gpt4oApiKey">The GPT-4o API key.</param>
     /// <param name="itemsToExtract">The items to extract while processing.</param>
     /// <param name="resultType">The result type.</param>
+    /// <param name="apiKey">The LlamaCloud key.</param>
     public Configuration(
+        string apiKey,
         Languages language = Languages.English,
+        string? endpoint = null,
         string? parsingInstructions = null,
         bool skipDiagonalText = false,
         bool invalidateCache = false,
@@ -35,7 +39,9 @@ public class Configuration
         ItemType itemsToExtract = ItemType.None,
         ResultType resultType = default)
     {
+        ApiKey = apiKey;
         Language = language;
+        Endpoint = endpoint;
         ParsingInstructions = parsingInstructions;
         SkipDiagonalText = skipDiagonalText;
         InvalidateCache = invalidateCache;
@@ -50,9 +56,19 @@ public class Configuration
     }
 
     /// <summary>
+    /// Gets the LlamaCloud key.
+    /// </summary>
+    public string ApiKey { get; }
+
+    /// <summary>
     /// Gets the language to use for parsing.
     /// </summary>
     public Languages Language { get; }
+
+    /// <summary>
+    ///  Gets the Llama cloud endpoint.
+    /// </summary>
+    public string? Endpoint { get; }
 
     /// <summary>
     /// Gets the parsing instructions.

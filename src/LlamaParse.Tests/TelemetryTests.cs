@@ -37,9 +37,9 @@ public class TelemetryTests
 
         ActivitySource.AddActivityListener(listener);
 
-        var config = new Configuration(itemsToExtract: ItemType.Image);
-        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty,
-            configuration:config);
+        var config = new Configuration(Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, itemsToExtract: ItemType.Image);
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())),
+            config);
 
         var fileInfo = new FileInfo("./data/polyglot_tool.pdf");
 
