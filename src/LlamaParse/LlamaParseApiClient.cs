@@ -60,8 +60,8 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
             jobMetaData.GetProperty(Constants.JobIsCacheHitKey).GetBoolean());
     }
 
-    public async Task<string> CreateJobAsync(ReadOnlyMemory<byte> data, string fileName, string mimeType,
-        Configuration configuration, CancellationToken cancellationToken)
+    public async Task<string> CreateJobAsync(ReadOnlyMemory<byte> data, string fileName, string mimeType, 
+        Configuration configuration, Languages? language, CancellationToken cancellationToken)
     {
         // upload file and create a job
         var uploadUri = new Uri($"{endpoint.TrimEnd('/')}/api/parsing/upload");
@@ -80,7 +80,7 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
         form.Add(fileContent);
 
         // Add additional configuration to form data
-        form.Add(new StringContent(configuration.Language.ToLanguageCode()), "language");
+        form.Add(new StringContent((language??configuration.Language).ToLanguageCode()), "language");
 
         if (!string.IsNullOrWhiteSpace(configuration.ParsingInstructions))
             form.Add(new StringContent(configuration.ParsingInstructions), "parsing_instruction");

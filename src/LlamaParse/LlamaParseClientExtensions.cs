@@ -4,7 +4,6 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -21,11 +20,19 @@ public static class LlamaParseClientExtensions
     /// <param name="file">The file to load data from.</param>
     /// <param name="splitByPage">Indicates whether to split the data by page.</param>
     /// <param name="metadata">Optional metadata for the document.</param>
+    /// <param name="itemsToExtract">Optional item to extract <see cref="ItemType"/></param>
+    /// <param name="language">Optional Language</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>An asynchronous enumerable of Document objects.</returns>
-    public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, FileInfo file, bool splitByPage = false, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+    public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, FileInfo file, bool splitByPage = false, Dictionary<string, object>? metadata = null, Languages? language = null, ItemType? itemsToExtract = null, CancellationToken cancellationToken = default)
     {
-        return llamaParseClient.LoadDataAsync([file], splitByPage, metadata, cancellationToken);
+        return llamaParseClient.LoadDataAsync(
+            files: [file], 
+            splitByPage: splitByPage,
+            metadata: metadata, 
+            itemsToExtract: itemsToExtract, 
+            language: language, 
+            cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -35,11 +42,19 @@ public static class LlamaParseClientExtensions
     /// <param name="inMemoryFile">The file to load data from. <see cref="InMemoryFile"/></param>
     /// <param name="splitByPage">Indicates whether to split the data by page.</param>
     /// <param name="metadata">Optional metadata for the document.</param>
+    /// <param name="itemsToExtract">Optional item to extract <see cref="ItemType"/></param>
+    /// <param name="language">Optional Language</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>An asynchronous enumerable of Document objects.</returns>
-    public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, InMemoryFile inMemoryFile, bool splitByPage = false, Dictionary<string, object>? metadata = null, CancellationToken cancellationToken = default)
+    public static IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, InMemoryFile inMemoryFile, bool splitByPage = false, Dictionary<string, object>? metadata = null, Languages? language = null, ItemType? itemsToExtract = null, CancellationToken cancellationToken = default)
     {
-        return llamaParseClient.LoadDataAsync([inMemoryFile], splitByPage, metadata, cancellationToken);
+        return llamaParseClient.LoadDataAsync(
+            inMemoryFiles: [inMemoryFile], 
+            splitByPage: splitByPage, 
+            metadata: metadata, 
+            itemsToExtract: itemsToExtract, 
+            language: language, 
+            cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -48,21 +63,35 @@ public static class LlamaParseClientExtensions
     /// <param name="llamaParseClient">The LlamaParseClient instance.</param>
     /// <param name="inMemoryFiles">The in-memory files to load data from. <see cref="inMemoryFiles"/> </param>
     /// <param name="splitByPage">Indicates whether to split the data by page.</param>
-    /// <param name="metadata">Optional metadata for the document.</param>
+    /// <param name="metadata">Metadata for the document. (Optional)</param>
+    /// <param name="itemsToExtract">Item to extract.(Optional)<see cref="ItemType"/></param>
+    /// <param name="language">Language (Optional)</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>An asynchronous enumerable of Document objects.</returns>
     public static async IAsyncEnumerable<Document> LoadDataAsync(
         this LlamaParseClient llamaParseClient,
         IEnumerable<InMemoryFile> inMemoryFiles,
         bool splitByPage = false,
+        Languages? language = null, 
+        ItemType? itemsToExtract = null,
         Dictionary<string, object>? metadata = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var documentMetadata = metadata ?? new Dictionary<string, object>();
 
-        await foreach (var rawResult in llamaParseClient.LoadDataRawAsync(inMemoryFiles, ResultType.Json, documentMetadata, cancellationToken))
+        await foreach (var rawResult in llamaParseClient.LoadDataRawAsync(
+                           files:inMemoryFiles, 
+                           resultType: ResultType.Json, 
+                           metadata: documentMetadata, 
+                           language: language, cancellationToken))
         {
-            await foreach (var document in CreateDocumentsFromRawResult(llamaParseClient, rawResult, splitByPage, documentMetadata, cancellationToken))
+            await foreach (var document in CreateDocumentsFromRawResult(
+                               llamaParseClient: llamaParseClient, 
+                               rawResult: rawResult, 
+                               splitByPage: splitByPage, 
+                               documentMetadata: documentMetadata, 
+                               itemsToExtract: itemsToExtract, 
+                               cancellationToken: cancellationToken))
             {
                 yield return document;
             }
@@ -77,15 +106,28 @@ public static class LlamaParseClientExtensions
     /// <param name="files">The files to load data from.</param>
     /// <param name="splitByPage">Indicates whether to split the data by page.</param>
     /// <param name="metadata">Optional metadata for the document.</param>
+    /// <param name="itemsToExtract">Optional item to extract <see cref="ItemType"/></param>
+    /// <param name="language">Language (Optional)</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>An asynchronous enumerable of Document objects.</returns>
-    public static async IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, IEnumerable<FileInfo> files, bool splitByPage = false, Dictionary<string, object>? metadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public static async IAsyncEnumerable<Document> LoadDataAsync(this LlamaParseClient llamaParseClient, IEnumerable<FileInfo> files, bool splitByPage = false, Dictionary<string, object>? metadata = null, Languages? language = null, ItemType? itemsToExtract = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var documentMetadata = metadata ?? new Dictionary<string, object>();
 
-        await foreach (var rawResult in llamaParseClient.LoadDataRawAsync(files, ResultType.Json, documentMetadata, cancellationToken))
+        await foreach (var rawResult in llamaParseClient.LoadDataRawAsync(
+                           files: files, 
+                           resultType: ResultType.Json, 
+                           metadata: documentMetadata, 
+                           language: language, 
+                           cancellationToken: cancellationToken))
         {
-            await foreach (var document in CreateDocumentsFromRawResult(llamaParseClient, rawResult, splitByPage, documentMetadata, cancellationToken))
+            await foreach (var document in CreateDocumentsFromRawResult(
+                               llamaParseClient: llamaParseClient,
+                               rawResult: rawResult,
+                               splitByPage: splitByPage,
+                               documentMetadata: documentMetadata,
+                               itemsToExtract: itemsToExtract,
+                               cancellationToken: cancellationToken))
             {
                 yield return document;
             }
@@ -113,8 +155,11 @@ public static class LlamaParseClientExtensions
         builder.Services.AddKeyedSingleton<LlamaParseClient>(name, (p, _) => ConfigureClient(p, configuration));
     }
 
-    private static async IAsyncEnumerable<Document> CreateDocumentsFromRawResult(LlamaParseClient llamaParseClient,
-        RawResult rawResult, bool splitByPage,
+    private static async IAsyncEnumerable<Document> CreateDocumentsFromRawResult(
+        LlamaParseClient llamaParseClient,
+        RawResult rawResult, 
+        bool splitByPage,
+        ItemType? itemsToExtract,
         Dictionary<string, object> documentMetadata,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -228,7 +273,9 @@ public static class LlamaParseClientExtensions
                 metadata: documentMetadata);
         }
 
-        var extractImages = (llamaParseClient.Configuration.ItemsToExtract & ItemType.Image) == ItemType.Image;
+        var itemTypesToExtract = itemsToExtract ?? llamaParseClient.Configuration.ItemsToExtract;
+
+        var extractImages = (itemTypesToExtract) == ItemType.Image;
 
         if (extractImages)
         {
@@ -246,7 +293,7 @@ public static class LlamaParseClientExtensions
             }
         }
 
-        var extractTables = (llamaParseClient.Configuration.ItemsToExtract & ItemType.Table) == ItemType.Table;
+        var extractTables = (itemTypesToExtract & ItemType.Table) == ItemType.Table;
 
         if (extractTables)
         {
