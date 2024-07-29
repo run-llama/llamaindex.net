@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Llamaindex.ServiceDefaults"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LlamaParseAspire", "samples\Aspire\LlamaParseAspire\LlamaParseAspire.csproj", "{F721E5DD-3C0E-41A3-B030-913E4AE187F5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParseDocuments", "samples\GettingStarted\ParseDocuments\ParseDocuments.csproj", "{B0CD869E-5DAD-4EA7-AB5D-68A3516DF8E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{F721E5DD-3C0E-41A3-B030-913E4AE187F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F721E5DD-3C0E-41A3-B030-913E4AE187F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F721E5DD-3C0E-41A3-B030-913E4AE187F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0CD869E-5DAD-4EA7-AB5D-68A3516DF8E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0CD869E-5DAD-4EA7-AB5D-68A3516DF8E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0CD869E-5DAD-4EA7-AB5D-68A3516DF8E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0CD869E-5DAD-4EA7-AB5D-68A3516DF8E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +75,7 @@ Global
 		{E6CAE94F-626F-4348-A062-EADA9CABDB7A} = {D41C4A39-8A5E-488C-A2AE-5B164F79B07C}
 		{D31D3C9F-5055-4914-90C6-566E0EA46877} = {D41C4A39-8A5E-488C-A2AE-5B164F79B07C}
 		{F721E5DD-3C0E-41A3-B030-913E4AE187F5} = {D41C4A39-8A5E-488C-A2AE-5B164F79B07C}
+		{B0CD869E-5DAD-4EA7-AB5D-68A3516DF8E1} = {D41C4A39-8A5E-488C-A2AE-5B164F79B07C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A523EAFD-F1D2-429A-97E2-F86406625D67}
