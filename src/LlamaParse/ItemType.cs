@@ -2,6 +2,9 @@
 
 namespace LlamaParse;
 
+/// <summary>
+/// Represents the type of item in a document.
+/// </summary>
 [Flags]
 public enum ItemType
 {

@@ -10,8 +10,19 @@ using System.Threading.Tasks;
 
 namespace LlamaIndex.Core.Retrievers;
 
+/// <summary>
+/// A client for retrieving nodes from a data source.
+/// </summary>
+/// <param name="host">The URI host for the data source</param>
+/// <param name="vectorDbCollectionName">The name of the collection where nodes are stored.</param>
 public class RetrieverClient(Uri host, string vectorDbCollectionName) : BaseRetriever
 {
+    /// <summary>
+    /// Retrieves nodes from the data source.
+    /// </summary>
+    /// <param name="query">An input query used to retreive similar nodes.</param>
+    /// <param name="cancellationToken">Propagates notification for operations to be cancelled.<see cref="CancellationToken"/> </param>
+    /// <returns>A collection of nodes. See <see cref="NodeWithScore"/></returns>
     protected override async Task<NodeWithScore[]> RetrieveNodesAsync(string query, CancellationToken cancellationToken)
     {
         var client = new HttpClient();

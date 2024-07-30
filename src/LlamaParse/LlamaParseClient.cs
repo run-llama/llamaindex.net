@@ -11,12 +11,21 @@ using System.Threading.Tasks;
 
 namespace LlamaParse;
 
+/// <summary>
+/// The LlamaParseClient class provides methods for parsing data from files using the LlamaParse service.
+/// </summary>
 public partial class LlamaParseClient
 { 
     internal Configuration Configuration { get; }
 
     private readonly LlamaParseApiClient _client;
 
+    /// <summary>
+    /// The LlamaParseClient constructor.
+    /// </summary>
+    /// <param name="client">The <see cref="HttpClient"/> used to make requests to the LlamaParse service.</param>
+    /// <param name="configuration">The LlamaParse <see cref="Configuration"/></param>
+    /// <exception cref="ArgumentException"></exception>
     public LlamaParseClient(HttpClient client, Configuration configuration)
     {
         if (string.IsNullOrWhiteSpace(configuration.ApiKey))
@@ -112,7 +121,7 @@ public partial class LlamaParseClient
     /// <param name="resultType">The type of result to retrieve. (Optional) <see cref="ResultType"/></param>
     /// <param name="metadata">Additional metadata for the document. (Optional)</param>
     /// <param name="language">Language (Optional)</param>
-    /// <param name="cancellationToken">The cancellation token. (Optional)</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> (Optional)</param>
     /// <returns>An asynchronous enumerable of RawResult objects representing the loaded data.</returns>
     public async IAsyncEnumerable<RawResult> LoadDataRawAsync(
         IEnumerable<FileInfo> files,
@@ -156,7 +165,7 @@ public partial class LlamaParseClient
     /// Loads images from a document asynchronously.
     /// </summary>
     /// <param name="document">The document containing the image metadata. <see cref="Document"/></param>
-    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/></param>
     /// <returns>An asynchronous enumerable of ImageDocument objects representing the loaded images.</returns>
     public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(Document document, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -169,6 +178,12 @@ public partial class LlamaParseClient
         }
     }
 
+    /// <summary>
+    /// Loads images from a document asynchronously.
+    /// </summary>
+    /// <param name="rawResult">The <see cref="RawResult"/> from a parsing job.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/></param>
+    /// <returns>An asynchronous enumerable of ImageDocument objects representing the loaded images.</returns>
     public IAsyncEnumerable<ImageDocument> LoadImagesAsync(RawResult rawResult, CancellationToken cancellationToken = default)
     {
         var jobId = rawResult.JobId;
@@ -176,6 +191,13 @@ public partial class LlamaParseClient
         return LoadImagesAsync(jobId, rawResult.Metadata, cancellationToken);
     }
 
+    /// <summary>
+    /// Loads images from a document asynchronously.
+    /// </summary>
+    /// <param name="jobId">The parse job ID</param>
+    /// <param name="documentMetadata">Additional document metadata.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/></param>
+    /// <returns></returns>
     public async IAsyncEnumerable<ImageDocument> LoadImagesAsync(string jobId, Dictionary<string, object>? documentMetadata = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var metadata = documentMetadata ?? new Dictionary<string, object>();

@@ -1,5 +1,8 @@
 ﻿namespace LlamaParse;
 
+/// <summary>
+/// The languages supported by LlamaParse.
+/// </summary>
 public enum Languages
 {
     Baza,
