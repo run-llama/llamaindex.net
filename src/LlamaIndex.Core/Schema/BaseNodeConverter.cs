@@ -5,13 +5,29 @@ using System.Text.Json.Serialization;
 
 namespace LlamaIndex.Core.Schema;
 
+/// <summary>
+/// Converts nodes to and from JSON.
+/// </summary>
 public class BaseNodeConverter : JsonConverter<BaseNode>
 {
+    /// <summary>
+    /// Checks whether a node can be converted into the specified type.
+    /// </summary>
+    /// <param name="typeToConvert">The type to convert the node into.</param>
+    /// <returns>Whether the node can be converted into the specified type</returns>
     public override bool CanConvert(Type typeToConvert)
     {
         return typeof(BaseNode).IsAssignableFrom(typeToConvert);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="reader">The JSON reader <see cref="Utf8JsonReader"/></param>
+    /// <param name="typeToConvert">The type to convert the node into.</param>
+    /// <param name="options">JSON serialization options. <see cref="JsonSerializerOptions"/></param>
+    /// <returns>A <see cref="BaseNode"/></returns>
+    /// <exception cref="NotSupportedException"></exception>
     public override BaseNode Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         using var jsonDoc = JsonDocument.ParseValue(ref reader);

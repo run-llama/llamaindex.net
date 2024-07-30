@@ -11,6 +11,9 @@ using System.Threading;
 
 namespace LlamaParse;
 
+/// <summary>
+/// The LlamaParseClientExtensions class provides extension methods for the LlamaParseClient class.
+/// </summary>
 public static class LlamaParseClientExtensions
 {
     /// <summary>
