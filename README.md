@@ -14,7 +14,7 @@ At this time, the following are supported:
 
 [LlamaIndex](https://llamaindex.ai/) is a data framework for LLM applications.
 
-[LlamaCloud](https://docs.llamaindex.ai/en/stable/llama_cloud/) is a managed platfor for data parsing and ingestion. It consists of the following components:
+[LlamaCloud](https://docs.llamaindex.ai/en/stable/llama_cloud/) is a managed platform for data parsing and ingestion. It consists of the following components:
 
 - [**LlamaParse**](https://docs.llamaindex.ai/en/stable/llama_cloud/llama_parse/): self-serve document parsing API
 - **Ingestion and Retreival API**: Connect to 10+ data sources and sinks. Easily setup a data pipeline that can handle large volumes of data and incremental updates.
