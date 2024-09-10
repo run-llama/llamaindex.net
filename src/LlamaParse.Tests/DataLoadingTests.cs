@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using LlamaIndex.Core.Schema;
 
 namespace LlamaParse.Tests;
@@ -24,13 +24,13 @@ public class DataLoadingTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_file_by_page()
     {
-        
+
         var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), new() { ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty });
 
         var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
         var documents = new List<Document>();
-        await foreach (var document in llamaParseClient.LoadDataAsync(fileInfo, splitByPage:true))
+        await foreach (var document in llamaParseClient.LoadDataAsync(fileInfo, splitByPage: true))
         {
             documents.Add(document);
         }
@@ -41,8 +41,8 @@ public class DataLoadingTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_file_by_page_and_include_images()
     {
-        var configuration = new Configuration {ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty,ItemsToExtract = ItemType.Image};
-        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())),  configuration);
+        var configuration = new Configuration { ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, ItemsToExtract = ItemType.Image };
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), configuration);
 
         var fileInfo = new FileInfo("./data/polyglot_tool.pdf");
 
@@ -60,8 +60,8 @@ public class DataLoadingTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_file_by_page_and_include_table()
     {
-        var configuration = new Configuration { ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, ItemsToExtract = ItemType.Table};
-        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())),configuration);
+        var configuration = new Configuration { ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, ItemsToExtract = ItemType.Table };
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), configuration);
 
         var fileInfo = new FileInfo("./data/polyglot_tool.pdf");
 

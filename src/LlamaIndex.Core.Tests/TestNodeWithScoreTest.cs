@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
 
@@ -50,9 +50,10 @@ public class TestNodeWithScoreTest
                     "679e7994-761b-4f49-a2fc-948f0f477c57",
 
                     text: "('Solomon Islands', 8)"
-                ){
+                )
+                {
                     ChildNodes = [new RelatedNodeInfo("123", NodeType.TextNode)],
-                    NextNode = new RelatedNodeInfo("123",  NodeType.Index),
+                    NextNode = new RelatedNodeInfo("123", NodeType.Index),
                     ParentNode = new RelatedNodeInfo("123", NodeType.Image),
                     PreviousNode = new RelatedNodeInfo("123", NodeType.TextNode),
                     SourceNode = new RelatedNodeInfo("123", NodeType.Document)
@@ -65,9 +66,10 @@ public class TestNodeWithScoreTest
                 new TextNode
                 (
 
-                    id:"88250f2c-165c-4395-b3ab-811474c8039d",
+                    id: "88250f2c-165c-4395-b3ab-811474c8039d",
                     text: "('Togo', 4)"
-                ){
+                )
+                {
                     ChildNodes = [new RelatedNodeInfo("123", NodeType.TextNode)],
                     NextNode = new RelatedNodeInfo("123", NodeType.Index),
                     ParentNode = new RelatedNodeInfo("123", NodeType.Image),

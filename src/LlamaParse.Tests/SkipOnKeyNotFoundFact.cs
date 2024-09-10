@@ -1,8 +1,8 @@
-namespace LlamaParse.Tests;
+﻿namespace LlamaParse.Tests;
 
 public sealed class SkipOnKeyNotFoundFact : FactAttribute
 {
-  
+
     private readonly string _reason = "Test skipped: Requires LLAMA_CLOUD_API_KEY to be set and not empty";
 
 #pragma warning disable CS8603 // Possible null reference return.

@@ -1,15 +1,15 @@
-﻿using LlamaParse;
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using LlamaParse;
 
 // Configure LlamaParse client
 var apiKey = Environment.GetEnvironmentVariable("LLAMACLOUD_API_KEY");
 
 var parseConfig = new Configuration()
 {
-    ApiKey = apiKey?? string.Empty
+    ApiKey = apiKey ?? string.Empty
 };
 
 var llamaParseClient = new LlamaParseClient(new HttpClient(), parseConfig);
@@ -31,8 +31,8 @@ await foreach (var parsedDoc in parsedDocs)
     };
 
     var result = JsonSerializer.Deserialize<ParseResult>(parsedDoc.Result, serializerOptions);
-    
-    foreach(var page in result.Pages)
+
+    foreach (var page in result.Pages)
     {
         Console.WriteLine($"Page {page.Page}");
         Console.WriteLine("-------------------");

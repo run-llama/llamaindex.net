@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
 
@@ -21,19 +21,19 @@ public class TextNodeTests
 
         var root = JsonDocument.Parse(json);
 
-        var options = new JsonSerializerOptions( JsonSerializerOptions.Default );
+        var options = new JsonSerializerOptions(JsonSerializerOptions.Default);
         options.Converters.Add(new BaseNodeConverter());
 
         var node = root.RootElement.Deserialize<TextNode>();
 
         node.Should().BeEquivalentTo(
-        
+
             new TextNode(
                 "679e7994-761b-4f49-a2fc-948f0f477c57",
                 text: "('Solomon Islands', 8)"
             )
             {
-                ParentNode = new RelatedNodeInfo("123",NodeType.Image),
+                ParentNode = new RelatedNodeInfo("123", NodeType.Image),
                 SourceNode = new RelatedNodeInfo("123", NodeType.Document),
                 NextNode = new RelatedNodeInfo("123", NodeType.Index),
                 PreviousNode = new RelatedNodeInfo("123", NodeType.TextNode),

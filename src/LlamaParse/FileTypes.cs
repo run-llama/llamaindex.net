@@ -53,7 +53,7 @@ internal static class FileTypes
         ".xml",
         ".zabw",
         ".epub",
-// images
+        // images
         ".jpg",
         ".jpeg",
         ".png",
@@ -62,10 +62,10 @@ internal static class FileTypes
         ".svg",
         ".tiff",
         ".webp",
-// web
+        // web
         ".htm",
         ".html",
-// spreadsheets
+        // spreadsheets
         ".xlsx",
         ".xls",
         ".xlsm",
