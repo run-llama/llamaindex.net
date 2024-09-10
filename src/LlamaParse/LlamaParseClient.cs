@@ -1,6 +1,4 @@
-﻿using LlamaIndex.Core.Schema;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -8,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using LlamaIndex.Core.Schema;
 
 namespace LlamaParse;
 
@@ -15,7 +14,7 @@ namespace LlamaParse;
 /// The LlamaParseClient class provides methods for parsing data from files using the LlamaParse service.
 /// </summary>
 public partial class LlamaParseClient
-{ 
+{
     internal Configuration Configuration { get; }
 
     private readonly LlamaParseApiClient _client;
@@ -34,7 +33,7 @@ public partial class LlamaParseClient
         }
 
         Configuration = JsonSerializer.Deserialize<Configuration>(
-            JsonSerializer.Serialize( configuration ))!;
+            JsonSerializer.Serialize(configuration))!;
         _client = new(client, configuration.ApiKey, string.IsNullOrWhiteSpace(configuration.Endpoint)
             ? "https://api.cloud.llamaindex.ai"
             : configuration.Endpoint!);
@@ -89,7 +88,7 @@ public partial class LlamaParseClient
         IEnumerable<InMemoryFile> files,
         ResultType? resultType = null,
         Dictionary<string, object>? metadata = null,
-        Languages? language = null, 
+        Languages? language = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var jobs = new List<Job>();
@@ -127,7 +126,7 @@ public partial class LlamaParseClient
         IEnumerable<FileInfo> files,
         ResultType? resultType = null,
         Dictionary<string, object>? metadata = null,
-        Languages? language = null, 
+        Languages? language = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var jobs = new List<Job>();
@@ -241,7 +240,7 @@ public partial class LlamaParseClient
     /// <param name="rawResult">The raw result containing the tables. <see cref="RawResult"/></param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>An asynchronous enumerable of Document objects representing the tables.</returns>
-    public async IAsyncEnumerable<Document> LoadTablesAsync(RawResult rawResult, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Document> LoadTablesAsync(RawResult rawResult)
     {
         await Task.Yield();
         var metadata = rawResult.Metadata ?? new Dictionary<string, object>();

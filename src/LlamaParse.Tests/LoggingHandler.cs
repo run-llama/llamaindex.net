@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -7,7 +7,7 @@ namespace LlamaParse.Tests;
 internal class LoggingHandler(HttpMessageHandler innerHandler, string folder = "", [CallerMemberName] string name = "")
     : DelegatingHandler(innerHandler)
 {
-    readonly string _folder = string.IsNullOrWhiteSpace( folder) ? Path.Combine( Path.GetTempPath(), "llamaparse_tests") : folder;
+    readonly string _folder = string.IsNullOrWhiteSpace(folder) ? Path.Combine(Path.GetTempPath(), "llamaparse_tests") : folder;
 
     private int _sequenceNumber = 0;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -18,9 +18,9 @@ internal class LoggingHandler(HttpMessageHandler innerHandler, string folder = "
         }
         var pattern = "Authorization: Bearer llx-[A-Za-z0-9-_]+";
         var replacement = "Authorization: Bearer 00";
-    
+
         var id = Interlocked.Increment(ref _sequenceNumber);
-        var now  = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
 
         var log = new StringBuilder();
         log.AppendLine("Request:");
@@ -31,7 +31,7 @@ internal class LoggingHandler(HttpMessageHandler innerHandler, string folder = "
         }
         log.AppendLine();
 
-        await File.WriteAllTextAsync(Path.Combine(_folder,$"{now}_{name}_request_message_{id}.txt"), Regex.Replace(log.ToString(), pattern, replacement), cancellationToken);
+        await File.WriteAllTextAsync(Path.Combine(_folder, $"{now}_{name}_request_message_{id}.txt"), Regex.Replace(log.ToString(), pattern, replacement), cancellationToken);
 
         log.Clear();
         var response = await base.SendAsync(request, cancellationToken);
@@ -44,7 +44,7 @@ internal class LoggingHandler(HttpMessageHandler innerHandler, string folder = "
         }
         log.AppendLine();
 
-        await File.WriteAllTextAsync(Path.Combine(_folder, $"{now}_{name}_response_message_{id}.txt"), Regex.Replace(log.ToString(), pattern, replacement), cancellationToken); 
+        await File.WriteAllTextAsync(Path.Combine(_folder, $"{now}_{name}_response_message_{id}.txt"), Regex.Replace(log.ToString(), pattern, replacement), cancellationToken);
         return response;
     }
 }

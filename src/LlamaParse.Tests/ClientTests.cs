@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using LlamaIndex.Core.Schema;
 using SkiaSharp;
 
@@ -9,7 +9,7 @@ public class ClientTests
     [Fact]
     public void throws_exception_when_parsing_unsupported_files()
     {
-        var llamaParseClient = new LlamaParseClient(new HttpClient(), new (){ ApiKey = "app key" });
+        var llamaParseClient = new LlamaParseClient(new HttpClient(), new() { ApiKey = "app key" });
 
         var fileInfo = new FileInfo("test.ghh");
 
@@ -45,11 +45,11 @@ public class ClientTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf()
     {
-        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), new() { ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY")??string.Empty } );
+        var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), new() { ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty });
 
         var fileInfo = new FileInfo("./data/attention_is_all_you_need.pdf");
 
-    
+
         var documents = new List<Document>();
         await foreach (var document in llamaParseClient.LoadDataAsync(fileInfo))
         {
@@ -68,7 +68,7 @@ public class ClientTests
 
 
         var documents = new List<RawResult>();
-        await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo,  resultType: ResultType.Markdown))
+        await foreach (var document in llamaParseClient.LoadDataRawAsync(fileInfo, resultType: ResultType.Markdown))
         {
             documents.Add(document);
         }
@@ -113,7 +113,7 @@ public class ClientTests
     [SkipOnKeyNotFoundFact]
     public async Task can_load_pdf_with_images()
     {
-        var configuration = new Configuration{ ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, ItemsToExtract = ItemType.Image};
+        var configuration = new Configuration { ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, ItemsToExtract = ItemType.Image };
 
         var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())), configuration);
 
@@ -125,8 +125,8 @@ public class ClientTests
         {
             if (document is ImageDocument imageDocument)
             {
-              
-                var imageObject = SKImage.FromEncodedData(Convert.FromBase64String( imageDocument.Image!));
+
+                var imageObject = SKImage.FromEncodedData(Convert.FromBase64String(imageDocument.Image!));
                 images.Add(imageObject);
             }
         }

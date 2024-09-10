@@ -1,12 +1,11 @@
-﻿using LlamaIndex.Core.Schema;
-
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using LlamaIndex.Core.Schema;
 
 namespace LlamaIndex.Core.Retrievers;
 

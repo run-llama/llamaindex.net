@@ -1,7 +1,6 @@
+﻿using System.Diagnostics;
 using FluentAssertions;
 using LlamaIndex.Core.Schema;
-
-using System.Diagnostics;
 
 namespace LlamaParse.Tests;
 
@@ -24,9 +23,10 @@ public class TelemetryTests
                 {
                     activities[activity.Id] = activity;
                 }
-               
+
             },
-            ActivityStopped = activity => {
+            ActivityStopped = activity =>
+            {
                 if (activity.Id is not null && activity.DisplayName.Contains("llamaparse."))
                 {
                     activities[activity.Id] = activity;
@@ -37,7 +37,7 @@ public class TelemetryTests
 
         ActivitySource.AddActivityListener(listener);
 
-        var config = new Configuration{ ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, ItemsToExtract = ItemType.Image };
+        var config = new Configuration { ApiKey = Environment.GetEnvironmentVariable("LLAMA_CLOUD_API_KEY") ?? string.Empty, ItemsToExtract = ItemType.Image };
         var llamaParseClient = new LlamaParseClient(new HttpClient(new LoggingHandler(new HttpClientHandler())),
             config);
 

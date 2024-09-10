@@ -1,6 +1,6 @@
+﻿using System.Text;
 using LlamaIndex.Core.Schema;
 using LlamaParse;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +39,7 @@ var fileUploadHandler = async (LlamaParseClient client, IFormFile file) =>
     var sb = new StringBuilder();
     await foreach (var doc in client.LoadDataAsync(inMemoryFile))
     {
-        if(doc is ImageDocument)
+        if (doc is ImageDocument)
         {
             continue;
         }

@@ -1,16 +1,38 @@
-name: Release Nuget
+name: Publish NuGet Package
 
 on:
+  push:
+    tags:
+      - "v*"
+
   workflow_dispatch:
 
 jobs:
-
-  build:
-    strategy:
-      matrix:
-        configuration: [Release]
-
-    runs-on: windows-latest  # For a list of available runner types, refer to
-                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
-
-
+  build-and-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Install .NET Aspire workload
+      run: dotnet workload install aspire
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+    
+    - name: Pack
+      run: dotnet pack --configuration Release --no-build --output nupkgs
+    
+    - name: Push to NuGet
+      run: dotnet nuget push ./nupkgs/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}} --skip-duplicate

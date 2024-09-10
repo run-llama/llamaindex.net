@@ -45,7 +45,7 @@ internal static class LlamaDiagnostics
             "llamaparse.get_result",
             [
                 new("job_id", jobId),
-                new ("result_type", resultType)
+                new("result_type", resultType)
             ]);
 
 
@@ -70,9 +70,9 @@ internal static class LlamaDiagnostics
             {
                 activity.EnrichWithTags(
                 [
-                    new (Constants.JobIsCacheHitKey, rawResults.IsCacheHit),
-                    new (Constants.JobPagesKey, rawResults.JobPages),
-                    new (Constants.JobCreditsUsageKey, rawResults.CreditsUsed),
+                    new(Constants.JobIsCacheHitKey, rawResults.IsCacheHit),
+                    new(Constants.JobPagesKey, rawResults.JobPages),
+                    new(Constants.JobCreditsUsageKey, rawResults.CreditsUsed),
 
                 ]);
             }
@@ -117,7 +117,7 @@ internal static class LlamaDiagnostics
              [
                  new("reason", reason),
 
-            ]);
+             ]);
 
         }
     }

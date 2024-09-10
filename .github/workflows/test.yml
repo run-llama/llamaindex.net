@@ -1,14 +1,13 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET
+name: Run tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
 
 jobs:
   build:
@@ -23,20 +22,9 @@ jobs:
         dotnet-version: 8.0.x
     - name: Install .NET Aspire workload
       run: dotnet workload install aspire
-
-    - name: Set Build Variables
-      id: dateStep
-      run: |      
-        echo "buildVersion=0.0.0-beta${{ github.run_number }}" >> $GITHUB_OUTPUT
-        echo "buildMode=$buildMode" >> $GITHUB_OUTPUT
-        echo "bumpBranch=$bumpBranch" >> $GITHUB_OUTPUT
-
-
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
-    - name: Pack nugets
-      run: dotnet pack -c Release /p:Version=${{ steps.dateStep.outputs.buildVersion }} -p ReleaseNotes="${{github.event.release.body}}" --output .
