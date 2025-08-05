@@ -54,7 +54,7 @@ internal class LlamaParseApiClient(HttpClient client, string apiKey, string endp
             jsonElement,
             null,
             jobMetaData.GetProperty(Constants.CreditsUsedKey).GetDouble(),
-            jobMetaData.GetProperty(Constants.CreditsMaxKey).GetDouble(),
+            jobMetaData.TryGetProperty(Constants.CreditsMaxKey, out var property) ? property.GetDouble() : -1,
             jobMetaData.GetProperty(Constants.JobCreditsUsageKey).GetDouble(),
             jobMetaData.GetProperty(Constants.JobPagesKey).GetDouble(),
             jobMetaData.GetProperty(Constants.JobIsCacheHitKey).GetBoolean());
