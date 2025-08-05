@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+	<!-- this file specifies a set of common properties imported by all projects in the folder -->
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<Company>LlamaIndex</Company>
+	</PropertyGroup>
+
+</Project>

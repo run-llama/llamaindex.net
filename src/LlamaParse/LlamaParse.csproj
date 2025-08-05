@@ -2,14 +2,11 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<IsPackable>true</IsPackable>
 		<PackageId>LlamaParse</PackageId>
-		<Company>LlamaIndex</Company>
 	</PropertyGroup>
 
 	<ItemGroup>
