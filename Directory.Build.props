@@ -6,6 +6,8 @@
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
 		<Company>LlamaIndex</Company>
+		<!-- IsPackable is enabled for all the projects and enabled only for the actual libraries -->
+		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 </Project>
