@@ -103,8 +103,8 @@ public partial class LlamaParseClient
                 foreach (var imageElement in pageElement.GetProperty("images").EnumerateArray())
                 {
                     var name = imageElement.GetProperty("name").GetString();
-                    var width = imageElement.GetProperty("width").GetInt32();
-                    var height = imageElement.GetProperty("height").GetInt32();
+                    var width = (int)imageElement.GetProperty("width").GetDouble();
+                    var height = (int)imageElement.GetProperty("height").GetDouble();
 
                     using var activity = LlamaDiagnostics.StartGetImageActivity(rawResult.JobId, name!);
 
@@ -119,12 +119,12 @@ public partial class LlamaParseClient
                         ["encoding"] = "base64"
                     };
 
-                    if (imageElement.TryGetProperty("real_width", out var realWidth))
+                    if (imageElement.TryGetProperty("original_width", out var originalWidth))
                     {
-                        pageMetadata["real_width"] = realWidth.GetInt32();
+                        pageMetadata["real_width"] = originalWidth.GetInt32();
                     }
 
-                    if (imageElement.TryGetProperty("real_height", out var realHeight))
+                    if (imageElement.TryGetProperty("original_height", out var realHeight))
                     {
                         pageMetadata["real_height"] = realHeight.GetInt32();
                     }
